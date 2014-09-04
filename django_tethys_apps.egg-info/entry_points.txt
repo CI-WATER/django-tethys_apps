@@ -1,0 +1,6 @@
+[paste.paster_create_template]
+tethys_app_scaffold = tethys_apps.pastetemplates:TethysAppTemplate
+
+[console_scripts]
+tethys-app-scaffold = tethys_apps.scripts.tethys_app_scaffold:main
+

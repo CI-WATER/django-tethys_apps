@@ -1,0 +1,34 @@
+from tethys_apps.base.app_base import AppBase
+
+class {{proper_no_spaces}}App(AppBase):
+    '''
+    Example implementation of an app (this is the initializer for the app)
+    '''
+    def register_app(self, app):
+        """
+        Register the app
+        """
+
+        app.add_app(name='{{proper_name}}',
+                    index='{{project}}:home',
+                    icon='{{project}}/images/icon.gif')
+        
+    def register_controllers(self, controllers):
+        """
+        Add controllers
+        """
+        root = '{{project}}'
+
+        controllers.add_controller(name='home',
+                                   url='{{project_url}}',
+                                   controller='{{project}}.controllers.index.index',
+                                   root=root)
+    
+    						   
+    def register_persistent_stores(self, persistent_stores):
+        """
+        Add one or more persistent stores
+        """
+        persistent_stores.add_persistent_store('stream_gage_db')
+        persistent_stores.add_initialization_script('my_first_app.lib.init_stream_gages_db')
+        

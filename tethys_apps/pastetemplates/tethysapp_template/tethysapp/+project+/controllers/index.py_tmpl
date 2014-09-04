@@ -1,0 +1,10 @@
+from django.shortcuts import render
+
+
+def index(request):
+    """
+    Controller for the app home page.
+    """
+    context = {'app_name': '{{proper_name}}'}
+
+    return render(request, '{{project}}/index.html', context)

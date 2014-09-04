@@ -1,0 +1,10 @@
+{% extends "{{project}}/app_base.html" %}
+
+{% block primary_content %}
+  <h1>{{ "{" }}{ app_name }{{ "}" }}</h1>
+{% endblock %}
+
+{% block secondary_content %}
+  <p>This is a basic app generated from the scaffold provided by Tethys SDK. Use this as a
+     starting point for all new apps.</p>
+{% endblock %}
