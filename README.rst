@@ -20,4 +20,4 @@ Quick start
 
 3. Run `python manage.py migrate` to create the Tethys models.
 
-4. Visit http://127.0.0.1:8000/apps/ to participate in the poll.
+4. Visit http://127.0.0.1:8000/apps/ to view the apps library.
