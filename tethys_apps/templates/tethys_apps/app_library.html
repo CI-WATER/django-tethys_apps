@@ -8,14 +8,20 @@
 {% endblock %}
 
 {% block primary_content %}
+  <div class="tethys-secondary-header narrow clearfix">
+    <div class="image-wrapper">
+      <img src="{% static 'tethys_apps/images/apps_library_icon.gif' %}" />
+    </div>
+    <div class="secondary-title-wrapper">
+      <span class="secondary-title">Apps Library</span>
+    </div>
+  </div>
   <div class="app-library-wrapper clearfix">
-    <h1>Apps</h1>
-
     <div id="app-list">
       {% for app in apps %}
         <a class="app-container" href="{% url app.index %}">
           <div class="app-icon">
-            <img src="{% static app.icon %}">
+            <img {% if app.icon %}src="{% static app.icon %}"{% else %}src="{% static 'tethys_apps/images/default_app_icon.gif' %}"{% endif %} />
           </div>
           <div class="app-title">
             <span>{{ app.name }}</span>
@@ -30,5 +36,5 @@
   {{ block.super }}
   <script src="{% static 'tethys_apps/vendor/imagesloaded.min.js' %}" type="text/javascript"></script>
   <script src="{% static 'tethys_apps/vendor/masonry.min.js' %}" type="text/javascript"></script>
-  <script src="{% static 'tethys_apps/js/main.js' %}" type="text/javascript"></script>
+  <script src="{% static 'tethys_apps/js/app_library.js' %}" type="text/javascript"></script>
 {% endblock %}

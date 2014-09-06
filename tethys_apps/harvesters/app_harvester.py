@@ -67,7 +67,7 @@ class SingletonAppHarvester(object):
     controllers = []
     _instance = None
 
-    def add_app(self, name, index, icon):
+    def add_app(self, name, index, icon=''):
         """
         Add app to Tethys
 
@@ -77,8 +77,7 @@ class SingletonAppHarvester(object):
         config = dictionary of configuration parameters that will
                  be global to the app these are to be read-only
         """
-
-        if icon[0] == '/':
+        if icon != '' and icon[0] == '/':
             icon = icon[1:]
             
         app = {
