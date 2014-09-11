@@ -1,0 +1,148 @@
+#site-wrapper {
+  padding-top: 0;
+  margin-bottom: 0;
+}
+#site-wrapper:after {
+  height: 0;
+}
+#app-header .tethys-app-header {
+  position: fixed;
+  background: #1b95dc;
+  height: 100px;
+  width: 100%;
+  z-index: 100;
+}
+#app-header .tethys-app-header .icon-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 20px;
+  z-index: 100;
+  margin-left: 30px;
+  padding: 10px;
+}
+#app-header .tethys-app-header .icon-wrapper img {
+  height: 80px;
+  border-radius: 50%;
+  background: #1b95dc;
+}
+#app-header .tethys-app-header .app-title-wrapper {
+  float: left;
+}
+#app-header .tethys-app-header .app-title-wrapper .app-title {
+  display: block;
+  padding: 20px 0;
+  padding-left: 130px;
+  font-size: 40px;
+  color: white;
+  font-weight: 300;
+  -webkit-font-smoothing: antialiased;
+}
+#app-header .tethys-app-header .exit-button {
+  float: right;
+  margin-right: 50px;
+  margin-top: 26px;
+}
+#app-header .tethys-app-header .exit-button a {
+  display: block;
+  padding: 10px 20px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+#app-header .tethys-app-header .exit-button a:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+#app-header .tethys-app-header .toggle-nav {
+  display: block;
+  height: 40px;
+  width: 20px;
+  float: left;
+  padding: 10px;
+  padding-left: 0;
+  margin: 30px 0;
+  border-radius: 0 5px 5px 0;
+}
+#app-header .tethys-app-header .toggle-nav div {
+  height: 3px;
+  background-color: #ffffff;
+  margin-bottom: 5px;
+  border-radius: 5px;
+}
+#app-header .tethys-app-header .toggle-nav div:last-child {
+  margin-bottom: 0;
+}
+#app-header .tethys-app-header .toggle-nav:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+#app-content-wrapper {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  min-height: 100%;
+}
+#app-content-wrapper #app-content {
+  position: relative;
+  width: 100%;
+  padding: 50px;
+  padding-top: 120px;
+  padding-bottom: 90px;
+  min-height: 100%;
+  -moz-transform: translateX(0);
+  -ms-transform: translateX(0);
+  -o-transform: translateX(0);
+  -webkit-transform: translateX(0);
+  transform: translateX(0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  -webkit-transition: -webkit-transform 0.33s cubic-bezier(0.694, 0.0482, 0.335, 1);
+  transition: -webkit-transform 0.33s cubic-bezier(0.694, 0.0482, 0.335, 1);
+}
+#app-content-wrapper #app-content #app-navigation {
+  position: absolute;
+  top: 0;
+  left: -300px;
+  width: 300px;
+  height: 100%;
+  background: #cfcfcf;
+  padding: 15px;
+  padding-top: 120px;
+}
+#app-content-wrapper #app-content #app-actions {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  right: 0;
+  padding: 20px 50px;
+}
+#app-content-wrapper #app-content #app-actions .separator {
+  border-top: 1px solid #DDDDDD;
+  margin-bottom: 20px;
+}
+#app-content-wrapper #app-content #app-actions .btn {
+  float: right;
+  margin-left: 10px;
+  padding: 10px 20px;
+}
+#app-content-wrapper.show-nav #app-content {
+  padding-right: 350px;
+  -moz-transform: translateX(300px);
+  -ms-transform: translateX(300px);
+  -o-transform: translateX(300px);
+  -webkit-transform: translateX(300px);
+  transform: translateX(300px);
+  -moz-transform: translate3d(300px, 0, 0);
+  -ms-transform: translate3d(300px, 0, 0);
+  -o-transform: translate3d(300px, 0, 0);
+  -webkit-transform: translate3d(300px, 0, 0);
+  transform: translate3d(300px, 0, 0);
+}
+#app-content-wrapper.show-nav #app-content #app-actions {
+  padding-right: 350px;
+}

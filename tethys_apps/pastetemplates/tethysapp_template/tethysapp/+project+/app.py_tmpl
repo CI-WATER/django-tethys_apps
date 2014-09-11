@@ -17,7 +17,7 @@ class {{proper_no_spaces}}App(AppBase):
         """
         Add controllers
         """
-        root = '{{project}}'
+        root = '{{project_url}}'
 
         controllers.add_controller(name='home',
                                    url='{{project_url}}',

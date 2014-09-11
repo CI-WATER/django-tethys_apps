@@ -1,6 +1,12 @@
 body {
   background: #efefef;
 }
+.no-apps-loaded-message {
+  width: 50%;
+  margin: 100px auto;
+  margin-bottom: 150px;
+  text-align: center;
+}
 #app-list {
   position: relative;
   margin: 0 auto;

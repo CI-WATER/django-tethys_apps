@@ -17,22 +17,51 @@ var TETHYS_APP_BASE = (function() {
 	/************************************************************************
  	*                      MODULE LEVEL / GLOBAL VARIABLES
  	*************************************************************************/
- 	var public_interface;   // The public interface object that is returned by the module
+ 	var public_interface,   // The public interface object that is returned by the module
+ 	    wrapper_selector;   // String selector used to apply the "show-nav" class
 
 
 
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var hello_world;
+ 	var apply_content_height, toggle_nav;
 
 
  	/************************************************************************
  	*                    PRIVATE FUNCTION IMPLEMENTATIONS
  	*************************************************************************/
 
- 	hello_world = function() {
- 		console.log("Hello, World!");
+
+ 	toggle_nav = function() {
+        if ($(wrapper_selector).hasClass('show-nav')) {
+            // Do things on Nav Close
+            $(wrapper_selector).removeClass('show-nav');
+        } else {
+            // Do thing on Nav Open
+            $(wrapper_selector).addClass('show-nav');
+        }
+ 	};
+
+ 	apply_content_height = function() {
+ 	    // Declare variables
+ 	    var app_actions_height, content_height, header_height, window_height;
+
+ 	    // Remove height property on wrapper
+ 	    $(wrapper_selector).css('height', 'auto');
+
+ 	    content_height = parseInt($('#app-content').css('height'));
+ 	    window_height = window.innerHeight;
+
+ 	    if (content_height <= window_height) {
+ 	      // Set the height to 100%
+ 	      console.log(wrapper_selector);
+ 	      $(wrapper_selector).css('height', '100%');
+ 	    } else {
+          // Set the height to auto
+          $(wrapper_selector).css('height', 'auto');
+
+ 	    }
  	};
 
 	/************************************************************************
@@ -46,9 +75,7 @@ var TETHYS_APP_BASE = (function() {
 	 * functions of the library because of JavaScript function scope.
 	 */
 	public_interface = {
-		hello_goodbye: function() {
-			hello_world();
-		}
+		toggle_nav: toggle_nav,
 	};
 
 	/************************************************************************
@@ -58,6 +85,22 @@ var TETHYS_APP_BASE = (function() {
 	// Initialization: jQuery function that gets called when
 	// the DOM tree finishes loading
 	$(function() {
+	    // Initialize globals
+	    wrapper_selector = '#app-content-wrapper';
+
+        // Bind toggle_nav to the click event of ".toggle-nav" element
+        $('.toggle-nav').click(function() {
+            public_interface.toggle_nav();
+            apply_content_height();
+        });
+
+        // Bind to the window resize event
+        window.onresize = function() {
+          apply_content_height();
+        }
+
+        // Run the content is tall check
+	    apply_content_height();
 
 	});
 

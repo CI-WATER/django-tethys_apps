@@ -17,18 +17,22 @@
     </div>
   </div>
   <div class="app-library-wrapper clearfix">
-    <div id="app-list">
-      {% for app in apps %}
-        <a class="app-container" href="{% url app.index %}">
-          <div class="app-icon">
-            <img {% if app.icon %}src="{% static app.icon %}"{% else %}src="{% static 'tethys_apps/images/default_app_icon.gif' %}"{% endif %} />
-          </div>
-          <div class="app-title">
-            <span>{{ app.name }}</span>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
+    {% if apps %}
+      <div id="app-list">
+        {% for app in apps %}
+          <a class="app-container" href="{% url app.index %}">
+            <div class="app-icon">
+              <img {% if app.icon %}src="{% static app.icon %}"{% else %}src="{% static 'tethys_apps/images/default_app_icon.gif' %}"{% endif %} />
+            </div>
+            <div class="app-title">
+              <span>{{ app.name }}</span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <h2 class="no-apps-loaded-message">There are no apps loaded.</h2>
+    {% endif %}
   </div>
 {% endblock %}
 

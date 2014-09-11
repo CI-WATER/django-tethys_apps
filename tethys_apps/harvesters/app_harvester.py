@@ -56,6 +56,10 @@ def django_url_preprocessor(url, root):
         # Handle empty string case
         django_url = r'^$'
 
+    print 'ROOT: ', root
+    print 'BEFORE: ', url
+    print 'AFTER: ', django_url
+
     return django_url
 
 
@@ -67,7 +71,7 @@ class SingletonAppHarvester(object):
     controllers = []
     _instance = None
 
-    def add_app(self, name, index, icon=''):
+    def add_app(self, name, index, icon='', color='#ffffff'):
         """
         Add app to Tethys
 
@@ -83,7 +87,8 @@ class SingletonAppHarvester(object):
         app = {
                'name': name,
                'index': index,
-               'icon': icon
+               'icon': icon,
+               'color': color
                }
         
         self.apps.append(app)
