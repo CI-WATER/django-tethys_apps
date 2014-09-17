@@ -54,15 +54,17 @@
           {% endblock %}
 
           {# App content starts here #}
-          {% block app_content %}{% endblock %}
+          <div id="inner-app-content">
+            {% block app_content %}{% endblock %}
 
-          {# App actions are fixed to the bottom #}
-          {% block app_actions_override %}
-            <div id="app-actions">
-              <div class="separator"></div>
-              {% block app_actions %}{% endblock %}
-            </div>
-          {% endblock %}
+            {# App actions are fixed to the bottom #}
+            {% block app_actions_override %}
+              <div id="app-actions">
+                <div class="separator"></div>
+                {% block app_actions %}{% endblock %}
+              </div>
+            {% endblock %}
+          </div>
         </div>
       {% endblock %}
     </div>

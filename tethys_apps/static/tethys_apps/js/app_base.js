@@ -19,16 +19,18 @@ var TETHYS_APP_BASE = (function() {
  	*************************************************************************/
  	var public_interface,         // The public interface object that is returned by the module
  	    apps_library_url,         // The relative url of the apps library page
- 	    wrapper_selector,         // String selector used to apply the "show-nav" class
- 	    toggle_nav_selector,      // String selector used to bind to the toggle nav element
- 	    app_navigation_selector;  // String selector used to app navigation selector
+ 	    app_header_selector,      // String selector for the app header element
+ 	    app_content_selector,     // String selector for the app content element
+ 	    wrapper_selector,         // String selector for the app wrapper element
+ 	    toggle_nav_selector,      // String selector for the toggle nav element
+ 	    app_navigation_selector;  // String selector for the app navigation element
 
 
 
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var apply_content_height, header_entry_handler, no_nav_handler, toggle_nav;
+ 	var apply_content_height, app_entry_handler, no_nav_handler, toggle_nav;
 
 
  	/************************************************************************
@@ -37,6 +39,12 @@ var TETHYS_APP_BASE = (function() {
 
     // Handle toggling nav effects
  	toggle_nav = function() {
+ 	    // Add the with-transition class if not present
+ 	    if ( !$(wrapper_selector).hasClass('with-transition') ) {
+ 	        $(wrapper_selector).addClass('with-transition');
+ 	    }
+
+ 	    // Toggle the show-nav class
         if ($(wrapper_selector).hasClass('show-nav')) {
             // Do things on Nav Close
             $(wrapper_selector).removeClass('show-nav');
@@ -52,13 +60,10 @@ var TETHYS_APP_BASE = (function() {
         }
  	};
 
- 	// Handle the header entry mode
- 	header_entry_handler = function() {
+ 	// Handle the entry entry transitions in the app
+ 	app_entry_handler = function() {
  	    // Declare vars
- 	    var  app_header_selector, referrer_no_protocol, referrer_no_host;
-
- 	    // Assign vars
- 	    app_header_selector = '.tethys-app-header';
+ 	    var  referrer_no_protocol, referrer_no_host;
 
  	    // Get the referrer url and strip off protocol
  	    referrer_no_protocol = document.referrer.split('//')[1];
@@ -67,14 +72,17 @@ var TETHYS_APP_BASE = (function() {
  	    if (referrer_no_protocol && referrer_no_protocol.indexOf(location.host) > -1) {
             referrer_no_host = referrer_no_protocol.replace(location.host, '');
 
-            // If the referrer was the app library, add transition class to make slide down effect
+            // If the referrer was the app library, add transition classes to create a
+            // smooth transition effect on app launch
             if (referrer_no_host === apps_library_url) {
-                $(app_header_selector).addClass('show-header-transition');
+                $(app_header_selector).addClass('with-transition');
+                $(app_content_selector).addClass('with-transition');
             }
  	    }
 
-        // Show the header always
+        // Add the "show" classes appropriately to show things that are hidden by default
  	    $(app_header_selector).addClass('show-header');
+ 	    $(app_content_selector).addClass('show-app-content');
  	};
 
  	// Handle case when there is no nav present
@@ -85,7 +93,7 @@ var TETHYS_APP_BASE = (function() {
             $('#app-content').css('transition', 'none');
             $(wrapper_selector).removeClass('show-nav');
 
-            // Hide the toggle button and remove
+            // Hide the toggle button and then remove it
             $(toggle_nav_selector).css('display', 'none');
             $(toggle_nav_selector).remove();
         }
@@ -96,18 +104,20 @@ var TETHYS_APP_BASE = (function() {
  	    // Declare variables
  	    var app_actions_height, content_height, header_height, window_height;
 
- 	    // Remove height property on wrapper
+ 	    // Remove height property on wrapper so our measurement isn't biased
  	    $(wrapper_selector).css('height', 'auto');
 
+        // Measure the content height and the window height for comparison
  	    content_height = parseInt($('#app-content').css('height'));
  	    window_height = window.innerHeight;
 
+        // If the content height is less than the window height...
  	    if (content_height <= window_height) {
- 	      // Set the height to 100%
+ 	      // Set the height to 100% so the content fills the window
  	      $(wrapper_selector).css('height', '100%');
 
  	    } else {
-          // Set the height to auto
+          // Otherwise, set the height to auto so that it overflows appropriately
           $(wrapper_selector).css('height', 'auto');
 
  	    }
@@ -123,9 +133,9 @@ var TETHYS_APP_BASE = (function() {
 	 * NOTE: The functions in the public interface have access to the private
 	 * functions of the library because of JavaScript function scope.
 	 */
-	public_interface = {
-		toggle_nav: toggle_nav,
-	};
+    public_interface = {
+        toggle_nav: toggle_nav,
+    };
 
 	/************************************************************************
  	*                  INITIALIZATION / CONSTRUCTOR
@@ -136,6 +146,8 @@ var TETHYS_APP_BASE = (function() {
 	$(function() {
 	    // Initialize globals
 	    apps_library_url = '/apps/';
+	    app_header_selector = '.tethys-app-header';
+ 	    app_content_selector = '#app-content';
 	    wrapper_selector = '#app-content-wrapper';
 	    toggle_nav_selector = '.toggle-nav';
 	    app_navigation_selector = '#app-navigation';
@@ -151,14 +163,14 @@ var TETHYS_APP_BASE = (function() {
           apply_content_height();
         }
 
-        // Run the content is tall check
+        // Adjust content height accordingly
 	    apply_content_height();
 
-	    // Run the app nav handler
+	    // Run no nav handler
 	    no_nav_handler();
 
-	    // Run the header entry handler
-	    header_entry_handler();
+	    // Run the app entry handler
+	    app_entry_handler();
 
 	});
 
