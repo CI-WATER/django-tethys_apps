@@ -11,21 +11,29 @@ body {
 }
 
 .header-wrapper {
-  margin-top: 0;
+  margin-top: -90px;
 
-  &.hide {
-    margin-top: -90px;
+  &.show {
+    margin-top: 0px;
+  }
+
+  &.with-transition {
+    .transition(margin 0.4s ease);
   }
 }
 
 .tethys-secondary-header {
   height: 100px;
-  margin-top: 0;
-  margin-bottom: 50px;
+  margin-top: -300px;
+  margin-bottom: 350px;
 
-  &.hide {
-    margin-top: -300px;
-    margin-bottom: 350px;
+  &.show {
+    margin-top: 0;
+    margin-bottom: 50px;
+  }
+
+  &.with-transition {
+    .transition(margin 0.4s ease);
   }
 
   .secondary-title-wrapper {

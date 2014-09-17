@@ -2,19 +2,33 @@ body {
   background: #efefef;
 }
 .header-wrapper {
-  margin-top: 0;
-}
-.header-wrapper.hide {
   margin-top: -90px;
+}
+.header-wrapper.show {
+  margin-top: 0px;
+}
+.header-wrapper.with-transition {
+  -webkit-transition: margin 0.4s ease;
+  -moz-transition: margin 0.4s ease;
+  -o-transition: margin 0.4s ease;
+  -ms-transition: margin 0.4s ease;
+  transition: margin 0.4s ease;
 }
 .tethys-secondary-header {
   height: 100px;
+  margin-top: -300px;
+  margin-bottom: 350px;
+}
+.tethys-secondary-header.show {
   margin-top: 0;
   margin-bottom: 50px;
 }
-.tethys-secondary-header.hide {
-  margin-top: -300px;
-  margin-bottom: 350px;
+.tethys-secondary-header.with-transition {
+  -webkit-transition: margin 0.4s ease;
+  -moz-transition: margin 0.4s ease;
+  -o-transition: margin 0.4s ease;
+  -ms-transition: margin 0.4s ease;
+  transition: margin 0.4s ease;
 }
 .tethys-secondary-header .secondary-title-wrapper .secondary-title {
   padding-top: 21px;

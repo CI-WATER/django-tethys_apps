@@ -20,14 +20,13 @@ var TETHYS_APPS_LIBRARY = (function() {
  	var public_interface,   // The public interface object that is returned by the module
  	    msnry,              // Global masonry object
  	    app_list_container, // Container with the app items in it
+ 	    apps_library_url,    // App library url
  	    app_item_selector;  // App item selector
-
-
 
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var launch_app;
+ 	var app_exit_handler, launch_app;
 
 
  	/************************************************************************
@@ -53,14 +52,45 @@ var TETHYS_APPS_LIBRARY = (function() {
         }, redirect_delay);
 
         // Hide the headers
-        $('.header-wrapper').css('transition', 'margin ' + transition_duration_string + ' ease');
-        $('.header-wrapper').css('margin-top', '-90px');
-        $('.tethys-secondary-header').css('transition', 'margin ' + transition_duration_string + ' linear');
-        $('.tethys-secondary-header').css('margin-top', '-300px');
-        $('.tethys-secondary-header').css('margin-bottom', secondary_margin_bottom.toString() + 'px');
+        $('.header-wrapper').addClass('with-transition');
+        $('.tethys-secondary-header').addClass('with-transition');
+
+        // Hide the headers
+        $('.header-wrapper').removeClass('show');
+        $('.tethys-secondary-header').removeClass('show');
 
         // Drop the curtain
         $('#app-library-curtain').addClass('show');
+ 	};
+
+ 	// Handle the app exit transitions in the app
+ 	app_exit_handler = function() {
+ 	    // Declare vars
+ 	    var  referrer_no_protocol, referrer_no_host, transition_duration, transition_duration_string;
+
+ 	    // Define transition timing
+ 	    transition_duration = 0.4; // seconds
+ 	    transition_duration_string = transition_duration.toString() + 's';
+
+ 	    // Get the referrer url and strip off protocol
+ 	    referrer_no_protocol = document.referrer.split('//')[1];
+
+        // Check if referrer exists and it contains our host
+ 	    if (referrer_no_protocol && referrer_no_protocol.contains(location.host)) {
+            referrer_no_host = referrer_no_protocol.replace(location.host, '');
+
+            // If the referrer is not the apps library url but apps library url is included in the referrer
+            // then it is likely we exited from an app
+            if ( referrer_no_host !== apps_library_url && referrer_no_host.contains(apps_library_url) ) {
+                // Do the opposite of the launch app method (i.e.: have headers hidden and slide in)
+                $('.header-wrapper').addClass('with-transition');
+                $('.tethys-secondary-header').addClass('with-transition');
+            }
+ 	    }
+
+ 	    // Always show headers
+ 	    $('.header-wrapper').addClass('show');
+ 	    $('.tethys-secondary-header').addClass('show');
  	};
 
 	/************************************************************************
@@ -73,9 +103,9 @@ var TETHYS_APPS_LIBRARY = (function() {
 	 * NOTE: The functions in the public interface have access to the private
 	 * functions of the library because of JavaScript function scope.
 	 */
-	public_interface = {
-		  launch_app: launch_app
-	};
+	 public_interface = {
+	     launch_app: launch_app
+	 };
 
 	/************************************************************************
  	*                  INITIALIZATION / CONSTRUCTOR
@@ -84,9 +114,17 @@ var TETHYS_APPS_LIBRARY = (function() {
 	// Initialization: jQuery function that gets called when
 	// the DOM tree finishes loading
 	$(function() {
+	    // Add a contains method to the String prototype
+	    if ( !String.prototype.contains ) {
+            String.prototype.contains = function() {
+                return String.prototype.indexOf.apply( this, arguments ) !== -1;
+            };
+        }
+
 	    // Get a handle on the app items container
-	    app_list_container = document.getElementById('app-list')
-	    app_item_selector = '.app-container'
+	    app_list_container = document.getElementById('app-list');
+	    app_item_selector = '.app-container';
+	    apps_library_url = '/apps/';
 
 	    // The Tethys apps library page uses masonry.js to accomplish the Pinterest-like stacking of the app icons
         msnry = new Masonry( app_list_container, {
@@ -100,6 +138,9 @@ var TETHYS_APPS_LIBRARY = (function() {
         imagesLoaded( app_list_container, function() {
           msnry.layout();
         });
+
+        // Check for app exit
+        app_exit_handler();
 	});
 
 	return public_interface;

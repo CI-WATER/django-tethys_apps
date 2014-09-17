@@ -360,8 +360,15 @@
 @media (max-width: 500px) {
   #app-header {
     .tethys-app-header {
+      height: 60px;
+
+      .toggle-nav {
+        margin: 10px;
+        margin-left: 0;
+      }
+
       .icon-wrapper {
-        padding: 30px;
+        padding: 10px;
         padding-left: 0;
 
         img {
@@ -371,10 +378,19 @@
 
       .app-title-wrapper {
         .app-title {
-          padding: 33px 0;
+          padding: 13px 0;
           padding-left: 65px;
           font-size: 24px;
           width: 230px;
+        }
+      }
+
+      .exit-button {
+        margin-right: 20px;
+        margin-top: 10px;
+
+        a {
+          padding: 6px 15px;
         }
       }
     }
