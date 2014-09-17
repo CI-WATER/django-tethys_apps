@@ -119,7 +119,6 @@ class TethysAppsStaticFinder(BaseFinder):
         """
         matches = []
         for prefix, root in self.locations:
-            print prefix, root
             matched_path = self.find_location(root, path, prefix)
             if matched_path:
                 if not all:
@@ -149,4 +148,3 @@ class TethysAppsStaticFinder(BaseFinder):
             storage = self.storages[root]
             for path in utils.get_files(storage, ignore_patterns):
                 yield path, storage
-

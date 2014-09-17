@@ -11,6 +11,17 @@
   height: 100px;
   width: 100%;
   z-index: 100;
+  margin-top: -100px;
+}
+#app-header .tethys-app-header.show-header {
+  margin-top: 0;
+}
+#app-header .tethys-app-header.show-header-transition {
+  -webkit-transition: margin 0.6s ease;
+  -moz-transition: margin 0.6s ease;
+  -o-transition: margin 0.6s ease;
+  -ms-transition: margin 0.6s ease;
+  transition: margin 0.6s ease;
 }
 #app-header .tethys-app-header .icon-wrapper {
   position: absolute;
@@ -59,11 +70,12 @@
 #app-header .tethys-app-header .toggle-nav {
   display: block;
   height: 40px;
-  width: 20px;
+  width: 15px;
   float: left;
   padding: 10px;
   padding-left: 0;
   margin: 30px 0;
+  margin-right: 5px;
   border-radius: 0 5px 5px 0;
 }
 #app-header .tethys-app-header .toggle-nav div {
@@ -114,6 +126,21 @@
   padding: 15px;
   padding-top: 120px;
 }
+#app-content-wrapper #app-content #app-navigation .nav {
+  height: 100%;
+  overflow: auto;
+}
+#app-content-wrapper #app-content #app-navigation .nav li.title {
+  padding: 10px 15px;
+  padding-top: 15px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #444444;
+  -webkit-font-smoothing: antialiasing;
+}
+#app-content-wrapper #app-content #app-navigation .nav li.separator {
+  margin: 20px 15px;
+}
 #app-content-wrapper #app-content #app-actions {
   position: absolute;
   width: 100%;
@@ -132,11 +159,11 @@
 }
 #app-content-wrapper.show-nav #app-content {
   padding-right: 350px;
-  -moz-transform: translateX(300px);
-  -ms-transform: translateX(300px);
-  -o-transform: translateX(300px);
-  -webkit-transform: translateX(300px);
-  transform: translateX(300px);
+  -moz-transform: translateX(-300px);
+  -ms-transform: translateX(-300px);
+  -o-transform: translateX(-300px);
+  -webkit-transform: translateX(-300px);
+  transform: translateX(-300px);
   -moz-transform: translate3d(300px, 0, 0);
   -ms-transform: translate3d(300px, 0, 0);
   -o-transform: translate3d(300px, 0, 0);

@@ -1,6 +1,6 @@
 from tethys_apps.base.app_base import AppBase
 
-class {{proper_no_spaces}}App(AppBase):
+class {{proper_no_spaces}}(AppBase):
     '''
     Example implementation of an app (this is the initializer for the app)
     '''
@@ -11,7 +11,8 @@ class {{proper_no_spaces}}App(AppBase):
 
         app.add_app(name='{{proper_name}}',
                     index='{{project}}:home',
-                    icon='{{project}}/images/icon.gif')
+                    icon='{{project}}/images/icon.gif',
+                    root_url='{{project_url}}')
         
     def register_controllers(self, controllers):
         """

@@ -27,15 +27,48 @@ var TETHYS_APPS_LIBRARY = (function() {
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var hello_world;
+ 	var launch_app;
 
 
  	/************************************************************************
  	*                    PRIVATE FUNCTION IMPLEMENTATIONS
  	*************************************************************************/
 
- 	hello_world = function() {
- 		console.log("Hello, World!");
+ 	launch_app = function(element, url) {
+ 	    // Declare variables
+ 	    var delay_ms, delay_s, delay_s_string, secondary_margin_bottom;
+
+ 	    // Assign variables
+ 	    delay_s = 0.8;             // seconds
+ 	    delay_ms = delay_s * 1000; // milliseconds
+ 	    delay_s_string = delay_s.toString() + 's';
+ 	    secondary_margin_bottom = parseInt($('.tethys-secondary-header').css('margin-bottom')) + 300;
+
+
+ 	    // Delay loading app to allow transition
+        setTimeout(function(){
+          // Redirect to app home page
+          window.location = url;
+        }, delay_ms);
+
+        // Hide the headers
+        $('.header-wrapper').css('transition', 'margin ' + delay_s_string + ' ease');
+        $('.header-wrapper').css('margin-top', '-90px');
+        $('.tethys-secondary-header').css('transition', 'margin ' + delay_s_string + ' ease');
+        $('.tethys-secondary-header').css('margin-top', '-300px');
+        $('.tethys-secondary-header').css('margin-bottom', secondary_margin_bottom.toString() + 'px');
+
+        // Adjust element
+        $(element).css('z-index', 300);
+
+        // Drop the curtain
+        $('#app-library-curtain').addClass('show');
+
+        // Hide the element
+        $(element).addClass('fade-prep');
+        $(element).addClass('fade-out');
+
+
  	};
 
 	/************************************************************************
@@ -49,9 +82,7 @@ var TETHYS_APPS_LIBRARY = (function() {
 	 * functions of the library because of JavaScript function scope.
 	 */
 	public_interface = {
-		hello_goodbye: function() {
-			hello_world();
-		}
+		  launch_app: launch_app
 	};
 
 	/************************************************************************

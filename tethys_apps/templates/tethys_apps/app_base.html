@@ -24,12 +24,12 @@
             {% endblock %}
             {% block app_icon_override %}
               <div class="icon-wrapper">
-                {% block app_icon %}{% endblock %}
+                {% block app_icon %}<img src="{% static tethys_app.icon %}">{% endblock %}
               </div>
             {% endblock %}
             {% block app_title_override %}
               <div class="app-title-wrapper">
-                <span class="app-title">{% block app_title %}{% endblock %}</span>
+                <span class="app-title">{% block app_title %}{{ tethys_app.name }}{% endblock %}</span>
               </div>
             {% endblock %}
             {% block exit_button_override %}
@@ -47,7 +47,7 @@
             <div id="app-navigation">
               {% block app_navigation %}
                 <ul class="nav nav-pills nav-stacked">
-                  {% block app_navigation_items %}
+                  {% block app_navigation_items %}{% endblock %}
                 </ul>
               {% endblock %}
             </div>

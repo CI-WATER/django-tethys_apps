@@ -56,10 +56,6 @@ def django_url_preprocessor(url, root):
         # Handle empty string case
         django_url = r'^$'
 
-    print 'ROOT: ', root
-    print 'BEFORE: ', url
-    print 'AFTER: ', django_url
-
     return django_url
 
 
@@ -67,11 +63,12 @@ class SingletonAppHarvester(object):
     """
     Collects information for building apps
     """
+    current_app = ''
     apps = []
     controllers = []
     _instance = None
 
-    def add_app(self, name, index, icon='', color='#ffffff'):
+    def add_app(self, name, index, root_url, icon=''):
         """
         Add app to Tethys
 
@@ -84,12 +81,11 @@ class SingletonAppHarvester(object):
         if icon != '' and icon[0] == '/':
             icon = icon[1:]
             
-        app = {
-               'name': name,
+        app = {'name': name,
                'index': index,
+               'root_url': root_url,
                'icon': icon,
-               'color': color
-               }
+        }
         
         self.apps.append(app)
         
@@ -97,7 +93,6 @@ class SingletonAppHarvester(object):
         """
         Add app controllers to Tethys
         """
-
         if django:
             # Pre-process the URL into the Django format
             url = django_url_preprocessor(url, root)
@@ -111,6 +106,16 @@ class SingletonAppHarvester(object):
                       'root': root}
         
         self.controllers.append(controller)
+
+    def get_app_from_index(self, index):
+        """
+        Retrieve the app metadata from the request object.
+        """
+        # Define vars
+        app = None
+
+
+        return app
         
     def __new__(self):
         """

@@ -20,7 +20,7 @@
     {% if apps %}
       <div id="app-list">
         {% for app in apps %}
-          <a class="app-container" href="{% url app.index %}">
+          <a class="app-container" href="javascript:void(0);" onclick="TETHYS_APPS_LIBRARY.launch_app(this, '{% url app.index %}');">
             <div class="app-icon">
               <img {% if app.icon %}src="{% static app.icon %}"{% else %}src="{% static 'tethys_apps/images/default_app_icon.gif' %}"{% endif %} />
             </div>
@@ -34,6 +34,7 @@
       <h2 class="no-apps-loaded-message">There are no apps loaded.</h2>
     {% endif %}
   </div>
+  <div id="app-library-curtain"></div>
 {% endblock %}
 
 {% block scripts %}

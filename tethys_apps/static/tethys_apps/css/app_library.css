@@ -1,6 +1,31 @@
 body {
   background: #efefef;
 }
+.header-wrapper {
+  margin-top: 0;
+}
+.header-wrapper.hide {
+  margin-top: -90px;
+}
+.tethys-secondary-header {
+  height: 100px;
+  margin-top: 0;
+  margin-bottom: 50px;
+}
+.tethys-secondary-header.hide {
+  margin-top: -300px;
+  margin-bottom: 350px;
+}
+.tethys-secondary-header .secondary-title-wrapper .secondary-title {
+  padding-top: 21px;
+  font-size: 40px;
+}
+.tethys-secondary-header .image-wrapper {
+  padding-left: 50px;
+}
+.tethys-secondary-header .image-wrapper img {
+  width: 120px;
+}
 .no-apps-loaded-message {
   width: 50%;
   margin: 100px auto;
@@ -35,6 +60,32 @@ body {
   background: #ffffff;
   -webkit-font-smoothing: antialiased;
 }
+#app-list .app-container:before {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0);
+  z-index: -1;
+  -webkit-transition: background-color 0.5s ease 0.3s;
+  -moz-transition: background-color 0.5s ease 0.3s;
+  -o-transition: background-color 0.5s ease 0.3s;
+  -ms-transition: background-color 0.5s ease 0.3s;
+  transition: background-color 0.5s ease 0.3s;
+}
+#app-list .app-container.fade-out {
+  box-shadow: none;
+}
+#app-list .app-container.fade-out:hover {
+  box-shadow: none;
+}
+#app-list .app-container.fade-out:before {
+  z-index: 210;
+  background-color: #ffffff;
+}
 #app-list .app-container:hover {
   box-shadow: 0px 0 10px 0 rgba(0, 0, 0, 0.1);
 }
@@ -47,6 +98,24 @@ body {
   height: 100%;
   border-radius: 5px;
   background: rgba(255, 255, 255, 0.15);
+}
+#app-library-curtain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: rgba(255, 255, 255, 0);
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  -webkit-transition: background-color ease 0.3s;
+  -moz-transition: background-color ease 0.3s;
+  -o-transition: background-color ease 0.3s;
+  -ms-transition: background-color ease 0.3s;
+  transition: background-color ease 0.3s;
+}
+#app-library-curtain.show {
+  background-color: #ffffff;
+  z-index: 200;
 }
 @media (max-width: 1200px) {
   #app-list {
@@ -61,6 +130,26 @@ body {
 @media (max-width: 720px) {
   #app-list {
     width: 480px;
+  }
+}
+@media (max-width: 700px) {
+  .tethys-secondary-header {
+    height: 100px;
+    margin-bottom: 0;
+  }
+  .tethys-secondary-header.hide {
+    margin-top: -300px;
+    margin-bottom: 300px;
+  }
+  .tethys-secondary-header .secondary-title-wrapper .secondary-title {
+    padding-left: 120px;
+  }
+  .tethys-secondary-header .image-wrapper {
+    position: inline-block;
+    padding: 10px 20px;
+  }
+  .tethys-secondary-header .image-wrapper img {
+    width: 80px;
   }
 }
 @media (max-width: 480px) {

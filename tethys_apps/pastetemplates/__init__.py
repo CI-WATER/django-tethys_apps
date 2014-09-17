@@ -18,6 +18,7 @@ import sys
 import re
 Command._bad_chars_re = re.compile('[^a-zA-Z0-9_-]')
 
+
 class TethysAppTemplate(Template):
 
     """
@@ -30,7 +31,7 @@ class TethysAppTemplate(Template):
 
     vars = [
         var('proper_name', 'e.g.: "My First App" for project name "my_first_app"'),
-        var('version', 'Version (like 0.1)'),
+        var('version', 'Version (like 0.0.1)'),
         var('description', 'One-line description of the app'),
         var('author', 'Author name'),
         var('author_email', 'Author email'),
@@ -46,8 +47,37 @@ class TethysAppTemplate(Template):
             print "\nError: Expected the project name to start with '{0}'".format(prefix)
             sys.exit(1)
 
-        vars['project'] = vars['project'][len(prefix):]
+        # Validate project name
+        project_error_regex = re.compile(r'^[a-zA-Z0-9_]+$')
+        project_warning_regex = re.compile(r'^[a-zA-Z0-9_-]+$')
+        project = vars['project'][len(prefix):]
+
+        # Only letters, numbers and underscores allowed in app names
+        if not project_error_regex.match(project):
+
+            # If the only offending character is a dash, replace dashes with underscores and notify user
+            if project_warning_regex.match(project):
+                before = project
+                project = project.replace('-', '_')
+                print '\nWarning: Dashes in project name "{0}" have been replaced ' \
+                      'with underscores "{1}"'.format(before, project)
+
+            # Otherwise, throw error
+            else:
+                print '\nError: Invalid characters in project name "{0}". Only letters, numbers, and underscores ' \
+                      '(no dashes) allowed after the "tethysapp-" prefix.'.format(project)
+                sys.exit(1)
+
+        vars['project'] = project
+
+        # Derive the project_url from the project name
+        vars['project_url'] = project.replace('_', '-').lower()
+
+        # Derive proper_name if not provided by user
+        if not vars['proper_name']:
+            vars['proper_name'] = project.replace('_', ' ').title()
+
+        # Derive the proper_no_spaces variable (used for the name of the App class)
         vars['proper_no_spaces'] = ''.join(vars['proper_name'].split())
-        vars['project_url'] = '-'.join(vars['proper_name'].split()).lower()
 
         return vars

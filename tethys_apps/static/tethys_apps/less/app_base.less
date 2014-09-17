@@ -1,6 +1,9 @@
+@import "vendor/prefixer.less";
+
 @app-nav-width: 300px;
 @app-content-padding: 50px;
 @app-header-background-color: #1b95dc;
+@app-header-height: 100px;
 
 #site-wrapper {
   padding-top: 0;
@@ -15,9 +18,18 @@
   .tethys-app-header {
     position: fixed;
     background: @app-header-background-color;
-    height: 100px;
+    height: @app-header-height;
     width: 100%;
     z-index: 100;
+    margin-top: -@app-header-height;
+
+    &.show-header {
+      margin-top: 0;
+    }
+
+    &.show-header-transition {
+      .transition(margin 0.6s ease);
+    }
 
     .icon-wrapper {
       position: absolute;
@@ -73,13 +85,13 @@
     .toggle-nav {
       display: block;
       height: 40px;
-      width: 20px;
+      width: 15px;
       float: left;
       padding: 10px;
       padding-left: 0;
       margin: 30px 0;
+      margin-right: 5px;
       border-radius: 0 5px 5px 0;
-
 
       div {
         height: 3px;
@@ -137,6 +149,31 @@
       background: #cfcfcf;
       padding: 15px;
       padding-top: 120px;
+
+      .nav {
+        height: 100%;
+        overflow: auto;
+
+        li {
+          a {
+
+          }
+
+          &.title {
+            padding: 10px 15px;
+            padding-top: 15px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #444444;
+            -webkit-font-smoothing: antialiasing;
+          }
+
+          &.separator {
+            margin: 20px 15px;
+            //border-top: 1px solid #888888;
+          }
+        }
+      }
     }
 
     #app-actions {
@@ -163,11 +200,11 @@
     #app-content {
       padding-right: @app-nav-width + @app-content-padding;
 
-      -moz-transform: translateX(@app-nav-width);
-      -ms-transform: translateX(@app-nav-width);
-      -o-transform: translateX(@app-nav-width);
-      -webkit-transform: translateX(@app-nav-width);
-      transform: translateX(@app-nav-width);
+      -moz-transform: translateX(-@app-nav-width);
+      -ms-transform: translateX(-@app-nav-width);
+      -o-transform: translateX(-@app-nav-width);
+      -webkit-transform: translateX(-@app-nav-width);
+      transform: translateX(-@app-nav-width);
 
       -moz-transform: translate3d(@app-nav-width, 0, 0);
       -ms-transform: translate3d(@app-nav-width, 0, 0);
