@@ -14,7 +14,7 @@
     <div id="app-content-wrapper" class="show-nav">
       {% block app_header_override %}
         <div id="app-header" class="clearfix">
-          <div class="tethys-app-header">
+          <div class="tethys-app-header" style="background: {{ tethys_app.color|default:'#1b95dc' }};">
             {% block app-navigation-toggle-override %}
               <a href="javascript:void(0);" class="toggle-nav">
                 <div></div>
@@ -60,7 +60,6 @@
             {# App actions are fixed to the bottom #}
             {% block app_actions_override %}
               <div id="app-actions">
-                <div class="separator"></div>
                 {% block app_actions %}{% endblock %}
               </div>
             {% endblock %}

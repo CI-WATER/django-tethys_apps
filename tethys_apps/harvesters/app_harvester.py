@@ -68,7 +68,7 @@ class SingletonAppHarvester(object):
     controllers = []
     _instance = None
 
-    def add_app(self, name, index, root_url, icon=''):
+    def add_app(self, name, index, root_url, icon='', color=''):
         """
         Add app to Tethys
 
@@ -80,12 +80,21 @@ class SingletonAppHarvester(object):
         """
         if icon != '' and icon[0] == '/':
             icon = icon[1:]
-            
+
+        # Validate color
+        if color != '' and color[0] != '#':
+            # Add hash
+            color = '#{0}'.format(color)
+
+        # Must be 6 or 3 digit hex color (7 or 4 with hash symbol)
+        if len(color) != 7 and len(color) != 4:
+            color = ''
+
         app = {'name': name,
                'index': index,
                'root_url': root_url,
                'icon': icon,
-        }
+               'color': color}
         
         self.apps.append(app)
         

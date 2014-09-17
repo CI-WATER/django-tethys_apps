@@ -26,15 +26,16 @@ var TETHYS_APP_BASE = (function() {
  	    app_navigation_selector,  // String selector for the app navigation element
  	    tethys_nav_cookie_key,    // Key for the tethys apps nav cookie
  	    nav_in_value,             // Value of the nav cookie when nav is in
- 	    nav_out_value;            // Value of the nav cookie when nav is out
+ 	    nav_out_value,            // Value of the nav cookie when nav is out
+ 	    app_color;                // App color
 
 
 
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var apply_content_height, app_entry_handler, no_nav_handler, exit_app,
- 	    toggle_nav;
+ 	var apply_content_height, apply_app_color_theme, app_entry_handler, check_responsive,
+ 	    no_nav_handler, exit_app, toggle_nav;
 
 
  	/************************************************************************
@@ -152,6 +153,42 @@ var TETHYS_APP_BASE = (function() {
  	    }
  	};
 
+    // Apply the custom color theme defined by app developer
+ 	apply_app_color_theme = function() {
+ 	    // Declare vars
+ 	    var rgb_parts, rgba_string, alpha;
+
+ 	    alpha = 0.5;
+
+ 	    // Apply theme to various elements
+ 	    $('#app-header .tethys-app-header .icon-wrapper img').css('background-color', app_color);
+ 	    $('#app-navigation .nav li a').css('color', app_color);
+ 	    $('#app-navigation .nav li.active a').css('background-color', app_color);
+ 	    $('#app-navigation .nav li.active a').css('color', '#ffffff');
+
+ 	    // Parse the rgb string into parts
+ 	    rgb_parts = app_color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)$/i);
+
+ 	    // Use the parts to create an rgba string with transparency
+ 	    if (rgb_parts) {
+ 	        rgba_string = 'rgba(' + rgb_parts[1] + ', ' + rgb_parts[2] + ', ' + rgb_parts[3] + ', ' + alpha.toString() + ')';
+ 	        $('#app-content-wrapper #app-content #app-actions').css('background-color', rgba_string);
+ 	    }
+ 	};
+
+ 	// Check for responsive parameters
+ 	check_responsive = function() {
+        var window_width;
+
+        window_width = window.innerWidth;
+
+        // Hide the nav if less than threshold
+        if ( window_width < 900 && $(wrapper_selector).hasClass('show-nav') ) {
+          $(wrapper_selector).removeClass('show-nav');
+          docCookies.setItem(tethys_nav_cookie_key, nav_out_value, null, apps_library_url);
+        }
+ 	};
+
     // Apply transition effect to exit button press
  	exit_app = function(url) {
  	    var redirect_delay;
@@ -202,16 +239,24 @@ var TETHYS_APP_BASE = (function() {
 	// Initialization: jQuery function that gets called when
 	// the DOM tree finishes loading
 	$(function() {
-	    // Initialize globals
+	    // Selector globals
 	    apps_library_url = '/apps/';
 	    app_header_selector = '.tethys-app-header';
  	    app_content_selector = '#app-content';
 	    wrapper_selector = '#app-content-wrapper';
 	    toggle_nav_selector = '.toggle-nav';
 	    app_navigation_selector = '#app-navigation';
+
+	    // Cookie globals
 	    tethys_nav_cookie_key = 'tethysappnav';
 	    nav_in_value = "a7dfd75f8f41f038258effc6d975cef7";
 	    nav_out_value = "3f64a50b313be90cc612d9a0a1debf30";
+
+	    // Style globals
+	    app_color = $(app_header_selector).css('background-color');
+
+	    // Apply color styles
+	    apply_app_color_theme();
 
         // Bind toggle_nav to the click event of ".toggle-nav" element
         $(toggle_nav_selector).click(function() {
@@ -222,6 +267,7 @@ var TETHYS_APP_BASE = (function() {
         // Bind to the window resize event
         window.onresize = function() {
           apply_content_height();
+          check_responsive();
         }
 
         // Adjust content height accordingly
@@ -232,6 +278,9 @@ var TETHYS_APP_BASE = (function() {
 
 	    // Run the app entry handler
 	    app_entry_handler();
+
+	    // Perform responsive check
+	    check_responsive();
 
 	});
 

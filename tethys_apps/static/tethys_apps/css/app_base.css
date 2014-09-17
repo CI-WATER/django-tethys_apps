@@ -90,6 +90,10 @@ p {
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 1700px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 #app-header .tethys-app-header .exit-button {
   float: right;
@@ -182,7 +186,7 @@ p {
   left: -300px;
   width: 300px;
   height: 100%;
-  background: #cfcfcf;
+  background: #efefef;
   padding: 0 15px;
   padding-top: 100px;
 }
@@ -195,16 +199,27 @@ p {
 #app-content-wrapper #app-content #app-navigation .nav::-webkit-scrollbar {
   display: none;
 }
+#app-content-wrapper #app-content #app-navigation .nav li a {
+  color: #1b95dc;
+}
+#app-content-wrapper #app-content #app-navigation .nav li a:hover {
+  background: #ffffff;
+  text-decoration: none;
+}
 #app-content-wrapper #app-content #app-navigation .nav li.title {
   padding: 10px 15px;
   padding-top: 15px;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 500;
   color: #444444;
   -webkit-font-smoothing: antialiasing;
 }
 #app-content-wrapper #app-content #app-navigation .nav li.separator {
   margin: 20px 15px;
+}
+#app-content-wrapper #app-content #app-navigation .nav li.active a {
+  color: white;
+  background: #1b95dc;
 }
 #app-content-wrapper #app-content #app-actions {
   position: absolute;
@@ -251,4 +266,70 @@ p {
   -o-transition: 0.2s ease-in-out padding;
   -ms-transition: 0.2s ease-in-out padding;
   transition: 0.2s ease-in-out padding;
+}
+@media (max-width: 1900px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 1500px;
+  }
+}
+@media (max-width: 1700px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 1300px;
+  }
+}
+@media (max-width: 1500px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 1100px;
+  }
+}
+@media (max-width: 1300px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 900px;
+  }
+}
+@media (max-width: 1100px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 700px;
+  }
+}
+@media (max-width: 900px) {
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    width: 500px;
+  }
+  #app-content-wrapper.show-nav #app-content {
+    padding-right: 50px;
+  }
+  #app-content-wrapper.show-nav #app-content #app-actions {
+    padding-right: 50px;
+  }
+}
+@media (max-width: 700px) {
+  #app-header .tethys-app-header .icon-wrapper {
+    padding: 20px;
+    padding-left: 0px;
+  }
+  #app-header .tethys-app-header .icon-wrapper img {
+    height: 60px;
+  }
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    padding: 29px 0;
+    padding-left: 100px;
+    font-size: 30px;
+    width: 350px;
+  }
+}
+@media (max-width: 500px) {
+  #app-header .tethys-app-header .icon-wrapper {
+    padding: 30px;
+    padding-left: 0;
+  }
+  #app-header .tethys-app-header .icon-wrapper img {
+    height: 40px;
+  }
+  #app-header .tethys-app-header .app-title-wrapper .app-title {
+    padding: 33px 0;
+    padding-left: 65px;
+    font-size: 24px;
+    width: 230px;
+  }
 }
