@@ -1,9 +1,20 @@
 @import "vendor/prefixer.less";
 
+// Characteristic Variables
 @app-nav-width: 300px;
 @app-content-padding: 50px;
 @app-header-background-color: #1b95dc;
 @app-header-height: 100px;
+
+// Transition Variables
+@header-transition-duration: 0.4s;
+@app-content-transition-duration: 0.2s;
+@app-content-transition-delay: @header-transition-duration + 0.1s;
+@app-nav-transition-duration: 0.2s;
+
+@header-transition-type: ease;
+@app-content-transition-type: ease;
+@app-nav-transition-type: ease-in-out;
 
 #app-header {
   .tethys-app-header {
@@ -19,7 +30,7 @@
     }
 
     &.with-transition {
-      .transition(margin 0.6s ease);
+      .transition(margin @header-transition-duration @header-transition-type);
     }
 
     .icon-wrapper {
@@ -127,9 +138,10 @@
       opacity: 1;
     }
 
+
     &.with-transition {
-      .transition(visibility 0.5s ease 0.5s);
-      .transition(opacity 0.5s ease 0.5s);
+      .transition(visibility @app-content-transition-duration @app-content-transition-type @app-content-transition-delay);
+      .transition(opacity @app-content-transition-duration @app-content-transition-type @app-content-transition-delay);
     }
 
     #app-navigation {
@@ -202,7 +214,11 @@
 
   &.with-transition {
       #app-content {
-        .transition(.3s ease all);
+        .transition(@app-nav-transition-duration @app-nav-transition-type all);
+
+        #app-actions {
+          .transition(@app-nav-transition-duration @app-nav-transition-type padding);
+        }
       }
   }
 }

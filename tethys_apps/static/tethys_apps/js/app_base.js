@@ -23,14 +23,18 @@ var TETHYS_APP_BASE = (function() {
  	    app_content_selector,     // String selector for the app content element
  	    wrapper_selector,         // String selector for the app wrapper element
  	    toggle_nav_selector,      // String selector for the toggle nav element
- 	    app_navigation_selector;  // String selector for the app navigation element
+ 	    app_navigation_selector,  // String selector for the app navigation element
+ 	    tethys_nav_cookie_key,    // Key for the tethys apps nav cookie
+ 	    nav_in_value,             // Value of the nav cookie when nav is in
+ 	    nav_out_value;            // Value of the nav cookie when nav is out
 
 
 
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var apply_content_height, app_entry_handler, no_nav_handler, toggle_nav;
+ 	var apply_content_height, app_entry_handler, no_nav_handler, exit_app,
+ 	    toggle_nav;
 
 
  	/************************************************************************
@@ -51,11 +55,17 @@ var TETHYS_APP_BASE = (function() {
             $(toggle_nav_selector).css('width', '20px');
             $(toggle_nav_selector).css('margin-right', '0');
 
+            // Toggle cookie
+            docCookies.setItem(tethys_nav_cookie_key, nav_out_value, null, apps_library_url);
+
         } else {
             // Do thing on Nav Open
             $(wrapper_selector).addClass('show-nav');
             $(toggle_nav_selector).css('width', '15px');
             $(toggle_nav_selector).css('margin-right', '5px');
+
+            // Toggle cookie
+            docCookies.setItem(tethys_nav_cookie_key, nav_in_value, null, apps_library_url);
 
         }
  	};
@@ -75,14 +85,33 @@ var TETHYS_APP_BASE = (function() {
             // If the referrer was the app library, add transition classes to create a
             // smooth transition effect on app launch
             if (referrer_no_host === apps_library_url) {
+                // Enable the transitions
                 $(app_header_selector).addClass('with-transition');
                 $(app_content_selector).addClass('with-transition');
+
+                // Remove the nav cookie
+ 	            docCookies.removeItem(tethys_nav_cookie_key, apps_library_url);
             }
  	    }
 
         // Add the "show" classes appropriately to show things that are hidden by default
  	    $(app_header_selector).addClass('show-header');
  	    $(app_content_selector).addClass('show-app-content');
+
+ 	    // Check the nav cookie
+ 	    if (docCookies.hasItem(tethys_nav_cookie_key)) {
+ 	      var nav_cookie_value;
+
+ 	      // Read the cookie
+ 	      nav_cookie_value = docCookies.getItem(tethys_nav_cookie_key);
+
+          if (nav_cookie_value == nav_out_value) {
+            $(wrapper_selector).removeClass('show-nav');
+
+          } else if (nav_cookie_value == nav_in_value) {
+            $(wrapper_selector).addClass('show-nav');
+          }
+ 	    }
  	};
 
  	// Handle case when there is no nav present
@@ -123,6 +152,34 @@ var TETHYS_APP_BASE = (function() {
  	    }
  	};
 
+    // Apply transition effect to exit button press
+ 	exit_app = function(url) {
+ 	    var redirect_delay;
+
+        redirect_delay = 400; // milliseconds
+
+        setTimeout(function(){
+          // Remove the nav cookie
+ 	      docCookies.removeItem(tethys_nav_cookie_key, apps_library_url);
+
+ 	      // Redirect to app home page
+          window.location = url;
+        }, redirect_delay);
+
+        // Add transition classes if necessary
+        if ( !$(app_header_selector).hasClass('with-transition') ) {
+          $(app_header_selector).addClass('with-transition');
+        }
+
+        if ( !$(app_content_selector).hasClass('with-transition') ) {
+          $(app_content_selector).addClass('with-transition');
+        }
+
+        // Hide by removing "show" classes
+        $(app_header_selector).removeClass('show-header');
+        $(app_content_selector).removeClass('show-app-content');
+ 	};
+
 	/************************************************************************
  	*                        DEFINE PUBLIC INTERFACE
  	*************************************************************************/
@@ -133,9 +190,10 @@ var TETHYS_APP_BASE = (function() {
 	 * NOTE: The functions in the public interface have access to the private
 	 * functions of the library because of JavaScript function scope.
 	 */
-    public_interface = {
-        toggle_nav: toggle_nav,
-    };
+     public_interface = {
+         toggle_nav: toggle_nav,
+         exit_app: exit_app,
+     };
 
 	/************************************************************************
  	*                  INITIALIZATION / CONSTRUCTOR
@@ -151,6 +209,9 @@ var TETHYS_APP_BASE = (function() {
 	    wrapper_selector = '#app-content-wrapper';
 	    toggle_nav_selector = '.toggle-nav';
 	    app_navigation_selector = '#app-navigation';
+	    tethys_nav_cookie_key = 'tethysappnav';
+	    nav_in_value = "a7dfd75f8f41f038258effc6d975cef7";
+	    nav_out_value = "3f64a50b313be90cc612d9a0a1debf30";
 
         // Bind toggle_nav to the click event of ".toggle-nav" element
         $(toggle_nav_selector).click(function() {

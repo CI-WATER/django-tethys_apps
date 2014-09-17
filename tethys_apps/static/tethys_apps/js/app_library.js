@@ -36,12 +36,13 @@ var TETHYS_APPS_LIBRARY = (function() {
 
  	launch_app = function(element, url) {
  	    // Declare variables
- 	    var delay_ms, delay_s, delay_s_string, secondary_margin_bottom;
+ 	    var redirect_delay, transition_duration, transition_duration_string, secondary_margin_bottom;
 
  	    // Assign variables
- 	    delay_s = 0.8;             // seconds
- 	    delay_ms = delay_s * 1000; // milliseconds
- 	    delay_s_string = delay_s.toString() + 's';
+ 	    transition_duration = 0.4; // seconds
+ 	    redirect_delay = transition_duration * 1000; // milliseconds
+ 	    transition_duration_string = transition_duration.toString() + 's';
+
  	    secondary_margin_bottom = parseInt($('.tethys-secondary-header').css('margin-bottom')) + 300;
 
 
@@ -49,26 +50,17 @@ var TETHYS_APPS_LIBRARY = (function() {
         setTimeout(function(){
           // Redirect to app home page
           window.location = url;
-        }, delay_ms);
+        }, redirect_delay);
 
         // Hide the headers
-        $('.header-wrapper').css('transition', 'margin ' + delay_s_string + ' ease');
+        $('.header-wrapper').css('transition', 'margin ' + transition_duration_string + ' ease');
         $('.header-wrapper').css('margin-top', '-90px');
-        $('.tethys-secondary-header').css('transition', 'margin ' + delay_s_string + ' ease');
+        $('.tethys-secondary-header').css('transition', 'margin ' + transition_duration_string + ' linear');
         $('.tethys-secondary-header').css('margin-top', '-300px');
         $('.tethys-secondary-header').css('margin-bottom', secondary_margin_bottom.toString() + 'px');
 
-        // Adjust element
-        $(element).css('z-index', 300);
-
         // Drop the curtain
         $('#app-library-curtain').addClass('show');
-
-        // Hide the element
-        $(element).addClass('fade-prep');
-        $(element).addClass('fade-out');
-
-
  	};
 
 	/************************************************************************
