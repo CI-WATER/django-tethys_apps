@@ -1,4 +1,6 @@
-@import "vendor/prefixer.less";
+@import "vendor/prefixer";
+@import "mixins";
+@import "app_base_typography";
 
 // Characteristic Variables
 @app-nav-width: 300px;
@@ -59,7 +61,7 @@
         font-size: 40px;
         color: white;
         font-weight: 300;
-        -webkit-font-smoothing: antialiased;
+        .font-smoothing();
       }
     }
 
@@ -76,10 +78,11 @@
         color: #ffffff;
         font-size: 20px;
         font-weight: 400;
-        -webkit-font-smoothing: antialiased;
+        .font-smoothing();
 
         &:hover {
           background: rgba(0, 0, 0, 0.1);
+          text-decoration: none;
         }
       }
     }
@@ -151,12 +154,18 @@
       width: @app-nav-width;
       height: 100%;
       background: #cfcfcf;
-      padding: 15px;
-      padding-top: 120px;
+      padding: 0 15px;
+      padding-top: 100px;
 
       .nav {
+        padding: 20px 0;
+        padding-bottom: 40px;
         height: 100%;
         overflow: auto;
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
 
         li {
           a {
