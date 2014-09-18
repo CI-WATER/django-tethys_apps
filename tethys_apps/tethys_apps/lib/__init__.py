@@ -85,4 +85,3 @@ def get_ckanapp_directory():
     
     
     
-    

@@ -156,11 +156,12 @@ class SingletonAppHarvester(object):
         Search each app package for the app.py module. Find the AppBase class in the app.py
         module and instantiate it. Returns a list of instantiated AppBase classes.
         """
+        print app_packages_list
         instance_list = []
         
         for app_package in app_packages_list:
             # Collect data from each app package in the apps directory
-            if app_package not in ['__init__.py', '__init__.pyc', '.gitignore']:
+            if app_package not in ['__init__.py', '__init__.pyc', '.gitignore', '.DS_Store']:
                 # Create the path to the app module in the custom app package
                 app_module_name = '.'.join(['tethys_apps.tethysapp', app_package, 'app'])
 
