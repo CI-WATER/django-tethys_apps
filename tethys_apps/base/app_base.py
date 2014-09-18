@@ -9,7 +9,7 @@
 """
 
 
-class AppBase:
+class AppBase(object):
     """
     Base class used for building apps
     """

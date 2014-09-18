@@ -21,8 +21,8 @@ dependencies = [
 setup(
     name=release_package,
     version={{repr(version or '0.0')}},
-    description=short_description,
-    long_description=long_description,
+    description={{repr(description) or ''}},
+    long_description='',
     keywords='',
     author={{repr(author or '')}},
     author_email={{repr(author_email or '')}},

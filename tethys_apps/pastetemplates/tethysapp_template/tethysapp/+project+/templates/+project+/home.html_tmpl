@@ -10,7 +10,7 @@
   <li><a href="">2. The Second Step</a></li>
   <li><a href="">3. The Third Step</a></li>
   <li class="separator"></li>
-  <li><a href="">Begin</a></li>
+  <li><a href="">Get Started</a></li>
 {% endblock %}
 
 {% block app_content %}

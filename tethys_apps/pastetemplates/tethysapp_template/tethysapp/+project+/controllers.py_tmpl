@@ -1,10 +1,10 @@
 from django.shortcuts import render
 
 
-def index(request):
+def home(request):
     """
     Controller for the app home page.
     """
     context = {}
 
-    return render(request, '{{project}}/index.html', context)
+    return render(request, '{{project}}/home.html', context)

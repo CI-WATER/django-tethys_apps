@@ -156,7 +156,6 @@ class SingletonAppHarvester(object):
         Search each app package for the app.py module. Find the AppBase class in the app.py
         module and instantiate it. Returns a list of instantiated AppBase classes.
         """
-        print app_packages_list
         instance_list = []
         
         for app_package in app_packages_list:

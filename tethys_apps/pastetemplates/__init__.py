@@ -7,15 +7,17 @@
 ********************************************************************************
 '''
 
+import sys
+import random
+import re
+
 from paste.script.templates import Template, var
 from paste.util.template import paste_script_template_renderer
 from paste.script.create_distro import Command
-import sys
 
 # Horrible hack to change the behaviour of Paste itself
 # Since this module is only imported when commands are
 # run, this will not affect any other paster commands.
-import re
 Command._bad_chars_re = re.compile('[^a-zA-Z0-9_-]')
 
 
@@ -38,6 +40,17 @@ class TethysAppTemplate(Template):
         var('url', 'URL of homepage'),
         var('license_name', 'License name'),
     ]
+
+    # Default colors from flatuicolors.com
+    default_colors = ('#2ecc71',    # Emerald
+                      '#3498db',    # Peter River
+                      '#34495e',    # Wet Asphalt
+                      '#9b59b6',    # Amethyst
+                      '#e67e22',    # Carrot
+                      '#f1c40f',    # Sun Flower
+                      '#e74c3c',    # Alizarin
+                      '#1abc9c',    # Turquoise
+    )
 
     def check_vars(self, vars, cmd):
         vars = Template.check_vars(self, vars, cmd)
@@ -79,5 +92,8 @@ class TethysAppTemplate(Template):
 
         # Derive the proper_no_spaces variable (used for the name of the App class)
         vars['proper_no_spaces'] = ''.join(vars['proper_name'].split())
+
+        # Add the color variable to vars
+        vars['color'] = random.choice(self.default_colors)
 
         return vars
