@@ -3,13 +3,14 @@ import sys
 import ConfigParser
 
 from sqlalchemy import create_engine
-from .tethys_apps.harvesters.persistent_store_harvester import PersistentStoreHarvester
-from .app_base import AppBase
+from tethys_apps.harvesters.persistent_store_harvester import PersistentStoreHarvester
+from tethys_apps.base.app_base import AppBase
+
 
 def provision_persistent_stores(app_module_path):
-    '''
+    """
     Used to create new databases for apps during installation
-    '''
+    """
     # Get tethys app manager url from config
     database_manager_url = get_database_manager_url()
     
@@ -20,7 +21,7 @@ def provision_persistent_stores(app_module_path):
     app_name = app_module_parts[0]
     
     # Prepend app module path with ckanapp namespace path
-    app_module_path ='.'.join(['ckanext.tethys_apps.ckanapp', app_module_path])
+    app_module_path = '.'.join(['ckanext.tethys_apps.ckanapp', app_module_path])
     
     # Harvest persistent store info from app.py
     # Create persistent store harvester
@@ -37,21 +38,23 @@ def provision_persistent_stores(app_module_path):
         app.registerPersistentStores(persistent_store_harvester)
         persistent_store_harvester.provisionPersistentStores(app_name, database_manager_url)
         persistent_store_harvester.runInitializationScripts()
-    
+
+
 def get_database_manager_url():
-    '''
+    """
     Parse tethys_apps.ini and retrieve the database_manager_url
-    '''
+    """
     tethys_apps_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     config_path = os.path.join(tethys_apps_path, 'tethys_apps.ini')
     config = ConfigParser.RawConfigParser()
     config.read(config_path)
     return config.get('tethys:main', 'tethys.database_manager_url')
 
+
 def get_existing_database_list():
-    '''
+    """
     Returns a list of the existing databases
-    '''
+    """
     # Get database manager
     database_manager_url = get_database_manager_url()
     
@@ -79,11 +82,12 @@ def get_existing_database_list():
         existing_db_names.append(existing_db.name)
         
     return existing_db_names
-    
+
+
 def get_persistent_store_engine(app_name, persistent_store_name):
-    '''
+    """
     Returns an sqlalchemy engine for the given store
-    '''
+    """
     # Create the unique store name
     unique_store_name = '_'.join([app_name, persistent_store_name])
     
@@ -104,7 +108,3 @@ def get_persistent_store_engine(app_name, persistent_store_name):
     else:
         print 'ERROR: No persisent store "{0}" for app "{1}". Make sure you register the persistent store in app.py and reinstall app.'.format(persistent_store_name, app_name)
         sys.exit()
-    
-    
-    
-    

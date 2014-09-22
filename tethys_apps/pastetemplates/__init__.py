@@ -33,7 +33,7 @@ class TethysAppTemplate(Template):
 
     vars = [
         var('proper_name', 'e.g.: "My First App" for project name "my_first_app"'),
-        var('version', 'Version (like 0.0.1)'),
+        var('version', 'e.g.: 0.0.1'),
         var('description', 'One-line description of the app'),
         var('author', 'Author name'),
         var('author_email', 'Author email'),
@@ -57,7 +57,7 @@ class TethysAppTemplate(Template):
         prefix = 'tethysapp-'
 
         if not vars['project'].startswith(prefix):
-            print "\nError: Expected the project name to start with '{0}'".format(prefix)
+            print('\nError: Expected the project name to start with "{0}"'.format(prefix))
             sys.exit(1)
 
         # Validate project name
@@ -72,13 +72,13 @@ class TethysAppTemplate(Template):
             if project_warning_regex.match(project):
                 before = project
                 project = project.replace('-', '_')
-                print '\nWarning: Dashes in project name "{0}" have been replaced ' \
-                      'with underscores "{1}"'.format(before, project)
+                print('\nWarning: Dashes in project name "{0}" have been replaced ' \
+                      'with underscores "{1}"'.format(before, project))
 
             # Otherwise, throw error
             else:
-                print '\nError: Invalid characters in project name "{0}". Only letters, numbers, and underscores ' \
-                      '(no dashes) allowed after the "tethysapp-" prefix.'.format(project)
+                print('\nError: Invalid characters in project name "{0}". Only letters, numbers, and underscores ' \
+                      '(no dashes) allowed after the "tethysapp-" prefix.'.format(project))
                 sys.exit(1)
 
         vars['project'] = project

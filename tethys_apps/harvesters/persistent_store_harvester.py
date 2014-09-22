@@ -1,40 +1,42 @@
-import os, ConfigParser
+import os
+import ConfigParser
 
 from sqlalchemy import create_engine
 
+
 class PersistentStoreHarvester():
-    '''
+    """
     Definition for object that collects information about persistent
     stores for apps
-    '''
+    """
     
     def __init__(self):
-        '''
+        """
         Constructor for persistent store harvester
-        '''
+        """
         self.requested_stores = []
         self.db_initialization_scripts = []
         
     def addPersistentStore(self, persistent_store_name):
-        '''
+        """
         Method used to request a persistent store. These databases
         will automatically be provisioned during app installation.
-        '''
+        """
 
         self.requested_stores.append(persistent_store_name)
         
     def addInitializationScript(self, script):
-        '''
+        """
         Method used to add a database initialization script. These scripts
         will be run after all databases have been provisioned.
-        '''
+        """
 
         self.db_initialization_scripts.append(script)
         
     def provisionPersistentStores(self, app_name, database_manager_url):
-        '''
+        """
         Provision all persistent stores in the requestsed_stores property
-        '''
+        """
         print 'Provisioning Persistent Stores...'
         
         # Get db credentials from CKAN config
@@ -111,9 +113,9 @@ class PersistentStoreHarvester():
         connection.close()
         
     def runInitializationScripts(self):
-        '''
+        """
         Run the initialization scripts
-        '''
+        """
         print 'Initializing Persistent Stores...'
         
         for script in self.db_initialization_scripts:
@@ -125,6 +127,3 @@ class PersistentStoreHarvester():
             
             # Run the module by importing it
             __import__(script)
-            
-        
-        

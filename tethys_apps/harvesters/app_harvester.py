@@ -9,122 +9,111 @@
 """
 
 import os
+import sys
 import inspect
 
-from tethys_apps.base.app_base import AppBase
+from django.conf import settings
+from sqlalchemy import create_engine
+
+from tethys_apps.base import TethysAppBase
 
 
-def django_url_preprocessor(url, root):
+def get_database_manager_url():
     """
-    Convert url from the simplified string version for app developers to
-    Django regular expressions.
-
-    e.g.:
-
-        '/example/resource/{variable_name}/'
-        r'^/example/resource/?P<variable_name>[1-9A-Za-z\-]+/$'
+    Parse tethys_apps.ini and retrieve the database_manager_url
     """
-    # Default Django expression that will be matched
-    DEFAULT_EXPRESSION = '[1-9A-Za-z-]+'
+    tethys_apps_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config_path = os.path.join(tethys_apps_path, 'tethys_apps.ini')
+    config = ConfigParser.RawConfigParser()
+    config.read(config_path)
+    return config.get('tethys:main', 'tethys.database_manager_url')
 
-    # Split the url into parts
-    url_parts = url.split('/')
-    django_url_parts = []
 
-    # Remove the root of the url if it is present
-    if root in url_parts:
-        index = url_parts.index(root)
-        url_parts.pop(index)
+def get_existing_database_list():
+    """
+    Returns a list of the existing databases
+    """
+    # Get database manager
+    database_manager_url = get_database_manager_url()
 
-    # Look for variables
-    for part in url_parts:
-        # Process variables
-        if '{' in part or '}' in part:
-            variable_name = part.replace('{', '').replace('}', '')
-            part = '(?P<{0}>{1})'.format(variable_name, DEFAULT_EXPRESSION)
+    # Create connection engine
+    engine = create_engine(database_manager_url)
 
-        # Collect processed parts
-        django_url_parts.append(part)
+    # Cannot create databases in a transactions
+    # Connect and commit to close transaction
+    connection = engine.connect()
 
-    # Join the process parts again
-    django_url_joined = '/'.join(django_url_parts)
+    # Check for Database
+    existing_dbs_statement = '''
+                             SELECT d.datname as name
+                             FROM pg_catalog.pg_database d
+                             LEFT JOIN pg_catalog.pg_user u ON d.datdba = u.usesysid
+                             ORDER BY 1;
+                             '''
 
-    # Final django-formatted url
-    if django_url_joined != '':
-        django_url = r'^{0}/$'.format(django_url_joined)
+    existing_dbs = connection.execute(existing_dbs_statement)
+
+    # Compile list of db names
+    existing_db_names = []
+
+    for existing_db in existing_dbs:
+        existing_db_names.append(existing_db.name)
+
+    return existing_db_names
+
+
+def get_persistent_store_engine(app_name, persistent_store_name):
+    """
+    Returns an sqlalchemy engine for the given store
+    """
+    # Create the unique store name
+    unique_store_name = '_'.join([app_name, persistent_store_name])
+
+    # Check to make sure that the persistent store exists
+    if unique_store_name in get_existing_database_list():
+        # Retrieve the database manager url.
+        # The database manager database user is the owner of all the app databases.
+        database_manager_url = get_database_manager_url()
+        url_parts = database_manager_url.split('/')
+
+
+        # Assemble url for persistent store with that name
+        persistent_store_url = '{0}//{1}/{2}'.format(url_parts[0], url_parts[2], unique_store_name)
+
+        # Return SQLAlchemy Engine
+        return create_engine(persistent_store_url)
+
     else:
-        # Handle empty string case
-        django_url = r'^$'
-
-    return django_url
+        print('ERROR: No persisent store "{0}" for app "{1}". Make sure you register the persistent store in app.py '
+              'and reinstall app.'.format(persistent_store_name, app_name))
+        sys.exit(1)
 
 
 class SingletonAppHarvester(object):
     """
     Collects information for building apps
     """
-    current_app = ''
+
     apps = []
-    controllers = []
     _instance = None
 
-    def add_app(self, name, index, root_url, icon='', color=''):
+    def harvest_apps(self):
         """
-        Add app to Tethys
-
-        name = name of app to appear on apps index page
-        index = name of controller to index/main page of app
-        icon = path to image in static directory
-        config = dictionary of configuration parameters that will
-                 be global to the app these are to be read-only
+        Searches the apps package for apps
         """
-        if icon != '' and icon[0] == '/':
-            icon = icon[1:]
+        # Notify user harvesting is taking place
+        print('Harvesting Apps:')
 
-        # Validate color
-        if color != '' and color[0] != '#':
-            # Add hash
-            color = '#{0}'.format(color)
+        # List the apps packages in directory
+        apps_dir = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'tethysapp')
+        app_packages_list = os.listdir(apps_dir)
 
-        # Must be 6 or 3 digit hex color (7 or 4 with hash symbol)
-        if len(color) != 7 and len(color) != 4:
-            color = ''
+        # Harvest App Instances
+        self._harvest_app_instances(app_packages_list)
 
-        app = {'name': name,
-               'index': index,
-               'root_url': root_url,
-               'icon': icon,
-               'color': color}
-        
-        self.apps.append(app)
-        
-    def add_controller(self, name, url, controller, root, django=True, action=None):
-        """
-        Add app controllers to Tethys
-        """
-        if django:
-            # Pre-process the URL into the Django format
-            url = django_url_preprocessor(url, root)
-
-            if root == '' or root is None:
-                raise ValueError("Argument 'root' cannot be None or the empty string.")
-        
-        controller = {'name': name,
-                      'url': url,
-                      'controller': '.'.join(['tethys_apps.tethysapp', controller]),
-                      'root': root}
-        
-        self.controllers.append(controller)
-
-    def get_app_from_index(self, index):
-        """
-        Retrieve the app metadata from the request object.
-        """
-        # Define vars
-        app = None
-
-
-        return app
+        # Create Persistent stores
+        self._provision_persistent_stores()
+        #self._run_initialization_scripts()
         
     def __new__(self):
         """
@@ -134,29 +123,33 @@ class SingletonAppHarvester(object):
             self._instance = super(SingletonAppHarvester, self).__new__(self)
             
         return self._instance
-        
-    def harvest_apps(self):
-        """
-        Searches the apps package for apps
-        """
-        print 'Harvesting Apps:'        
-        # List the apps packages in directory
-        apps_dir = os.path.join(os.path.split(os.path.dirname(__file__))[0], 'tethysapp')
-        app_packages_list = os.listdir(apps_dir)
-        
-        # Collect App Instances
-        app_instance_list = self._harvest_app_instances(app_packages_list)
-        
-        # Put the harvester to work
-        self._put_harvester_to_work(app_instance_list)
 
     @staticmethod
-    def _harvest_app_instances(app_packages_list):
+    def _validate_app(app):
+        """
+        Validate the app data that needs to be validated. Returns either the app if valid or None if not valid.
+        """
+        # Remove prepended slash if included
+        if app.icon != '' and app.icon[0] == '/':
+            app.icon = app.icon[1:]
+
+        # Validate color
+        if app.color != '' and app.color[0] != '#':
+            # Add hash
+            app.color = '#{0}'.format(app.color)
+
+        # Must be 6 or 3 digit hex color (7 or 4 with hash symbol)
+        if len(app.color) != 7 and len(app.color) != 4:
+            app.color = ''
+
+        return app
+
+    def _harvest_app_instances(self, app_packages_list):
         """
         Search each app package for the app.py module. Find the AppBase class in the app.py
-        module and instantiate it. Returns a list of instantiated AppBase classes.
+        module and instantiate it. Save the list of instantiated AppBase classes.
         """
-        instance_list = []
+        valid_app_instance_list = []
         
         for app_package in app_packages_list:
             # Collect data from each app package in the apps directory
@@ -173,29 +166,150 @@ class SingletonAppHarvester(object):
                     # them to find the the class that inherits from AppBase.
                     try:
                         # issubclass() will fail if obj is not a class
-                        if (issubclass(obj, AppBase)) and (obj is not AppBase):
+                        if (issubclass(obj, TethysAppBase)) and (obj is not TethysAppBase):
                             # Assign a handle to the class
                             _appClass = getattr(app_module, name)
-                    
+
+                            # Instantiate app and validate
                             app_instance = _appClass()
-                            instance_list.append(app_instance)
-                            print app_package
-                            
+                            validated_app_instance = self._validate_app(app_instance)
+
+                            # compile valid apps
+                            if validated_app_instance:
+                                valid_app_instance_list.append(validated_app_instance)
+
+                                # Notify user that the app has been loaded
+                                print('Loading {0}'.format(app_package))
+
                     except TypeError:
                         '''DO NOTHING'''
                     except:
                         raise
-            
-        return instance_list
-        
-    def _put_harvester_to_work(self, app_instance_list):
+
+        # Save valid apps
+        self.apps = valid_app_instance_list
+
+    def _provision_persistent_stores(self):
         """
-        Call each method of the AppBase on each app_instance
-        passing the collector (self) through to collect the
-        appropriate parameters.
+        Provision all persistent stores in the requested_stores property
         """
-        
-        for app_instance in app_instance_list:
-            # Call each method of AppBase on the instance
-            app_instance.register_app(self)
-            app_instance.register_controllers(self)
+        # Notify user of database provisioning
+        print('\nProvisioning Persistent Stores...')
+
+        # Get database manager url from the config
+        database_manager_url = settings.TETHYS_APPS_DATABASE_MANAGER_URL
+        database_manager_name = database_manager_url.split('://')[1].split(':')[0]
+
+        # Create connection engine
+        engine = create_engine(database_manager_url)
+
+        # Cannot create databases in a transaction: connect and commit to close transaction
+        connection = engine.connect()
+
+        # Check for Database
+        existing_dbs_statement = '''
+                                 SELECT d.datname as name
+                                 FROM pg_catalog.pg_database d
+                                 LEFT JOIN pg_catalog.pg_user u ON d.datdba = u.usesysid
+                                 ORDER BY 1;
+                                 '''
+
+        existing_dbs = connection.execute(existing_dbs_statement)
+
+        # Compile list of db names
+        existing_db_names = []
+
+        for existing_db in existing_dbs:
+            existing_db_names.append(existing_db.name)
+
+        # Get apps and provision persistent stores if not already created
+        for app in self.apps:
+
+            # Create multiple persistent stores if necessary
+            for persistent_store in app.persistent_stores():
+                full_db_name = '_'.join((app.package, persistent_store.name))
+                new_database = True
+
+                #------------------------------------------------------------------------------------------------------#
+                # 1. Create the database if it does not already exist
+                #------------------------------------------------------------------------------------------------------#
+                if full_db_name not in existing_db_names:
+                    # Provide Update for User
+                    print('Creating database "{0}" for app "{1}"...'.format(persistent_store.name, app.package))
+
+                    # Create db
+                    create_db_statement = '''
+                                          CREATE DATABASE {0}
+                                          WITH OWNER {1}
+                                          TEMPLATE template0
+                                          ENCODING 'UTF8'
+                                          '''.format(full_db_name, database_manager_name)
+
+                    # Close transaction first and then execute
+                    connection.execute('commit')
+                    connection.execute(create_db_statement)
+
+                else:
+                    # Provide Update for User
+                    print('Database "{0}" already exists for app "{1}", skipping...'.format(persistent_store.name,
+                                                                                            app.package))
+
+                    # Set var that is passed to initialization functions
+                    new_database = False
+
+                #------------------------------------------------------------------------------------------------------#
+                # 2. Enable PostGIS extension
+                #------------------------------------------------------------------------------------------------------#
+                if persistent_store.postgis:
+                    # Get URL for Tethys Superuser to enable extensions
+                    super_url = settings.TETHYS_APPS_SUPERUSER
+                    super_parts = super_url.split('/')
+                    new_db_url = '{0}//{1}/{2}'.format(super_parts[0], super_parts[2], full_db_name)
+
+                    # Connect to new database
+                    new_db_engine = create_engine(new_db_url)
+                    new_db_connection = new_db_engine.connect()
+
+                    # Notify user
+                    print('Enabling PostGIS on database "{0}" for app "{1}"...'.format(persistent_store.name,
+                                                                                       app.package))
+                    enable_postgis_statement = 'CREATE EXTENSION IF NOT EXISTS postgis'
+
+                    # Execute postgis statement
+                    new_db_connection.execute(enable_postgis_statement)
+                    connection.close()
+                #------------------------------------------------------------------------------------------------------#
+                # 3. Run initialization function here
+                #------------------------------------------------------------------------------------------------------#
+                print('Initialize database "{0}" for app "{1}"'.format(persistent_store.name, app.package))
+
+                # Split into module name and function name
+                initializer_mod, initializer_function = persistent_store.initializer.split(':')
+
+                # Pre-process initializer path
+                initializer_path = '.'.join(('tethys_apps.tethysapp', app.package, initializer_mod))
+
+                # Import module
+                module = __import__(initializer_path, fromlist=[initializer_function])
+
+                # Get the function
+                initializer = getattr(module, initializer_function)
+                initializer(new_database)
+
+
+
+    def _run_initialization_scripts(self):
+        """
+        Run the initialization scripts
+        """
+        print('Initializing Persistent Stores...')
+
+        for script in self.db_initialization_scripts:
+            # Provide feedback for user
+            print('Running {0}'.format(script))
+
+            # Add the tethysapp namespace
+            script = '.'.join(['tethys_apps.tethysapp',  script])
+
+            # Run the module by importing it
+            __import__(script)

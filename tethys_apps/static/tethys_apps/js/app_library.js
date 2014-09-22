@@ -26,7 +26,7 @@ var TETHYS_APPS_LIBRARY = (function() {
 	/************************************************************************
  	*                    PRIVATE FUNCTION DECLARATIONS
  	*************************************************************************/
- 	var app_exit_handler, launch_app;
+ 	var app_theme_effects, app_exit_handler, hex_to_rgb, launch_app;
 
 
  	/************************************************************************
@@ -93,6 +93,37 @@ var TETHYS_APPS_LIBRARY = (function() {
  	    $('.tethys-secondary-header').addClass('show');
  	};
 
+ 	hex_to_rgb = function(hex) {
+        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    };
+
+ 	// Apply app theme effects to app icon
+ 	app_theme_effects = function() {
+ 	    var app_item_selector;
+
+ 	    //app_item_selector = '.app-container .color-effect';
+ 	    app_item_selector = '.app-container';
+
+ 	    $(app_item_selector).each(function() {
+            var alpha, theme_color_rgb, tint_string;
+            alpha = 0.5;
+
+            theme_color_rgb = hex_to_rgb($(this).attr('data-app-theme-color'));
+            tint_string = 'rgba(' + theme_color_rgb.r + ',' + theme_color_rgb.g + ',' + theme_color_rgb.b + ',' + alpha + ')';
+
+            // Apply theme effects
+            $(this).css('background-color', tint_string);
+
+            console.log(tint_string);
+ 	    });
+
+ 	};
+
 	/************************************************************************
  	*                        DEFINE PUBLIC INTERFACE
  	*************************************************************************/
@@ -125,6 +156,9 @@ var TETHYS_APPS_LIBRARY = (function() {
 	    app_list_container = document.getElementById('app-list');
 	    app_item_selector = '.app-container';
 	    apps_library_url = '/apps/';
+
+	    // Apply app theme effects
+	    //app_theme_effects();
 
 	    // The Tethys apps library page uses masonry.js to accomplish the Pinterest-like stacking of the app icons
         msnry = new Masonry( app_list_container, {

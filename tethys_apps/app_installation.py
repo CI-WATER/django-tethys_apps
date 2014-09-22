@@ -51,9 +51,6 @@ def _run_develop(self):
     # Get paths
     tethysapp_dir = get_tethysapp_directory()
     destination_dir = os.path.join(tethysapp_dir, self.app_package)
-    print "Tethysapp Dir: ", tethysapp_dir
-    print "App Package Dir: ", self.app_package_dir
-    print "Destination Dir: ", destination_dir
 
     # Notify user
     print('Creating Symbolic Link to App Package: {0} to {1}'.format(self.app_package_dir, destination_dir))

@@ -14,7 +14,6 @@ def tethys_apps_context(request):
     url = request.path
     url_parts = url.split('/')
 
-    # START HERE
     # Find the app key
     if apps_root in url_parts:
         # The app root_url is the path item following (+1) the apps_root item
@@ -26,7 +25,10 @@ def tethys_apps_context(request):
 
         # If a match can be made, return the app dictionary as part of the context
         for app in apps:
-            if app['root_url'] == app_root_url:
-                context['tethys_app'] = app
+            if app.root_url == app_root_url:
+                context['tethys_app'] = {'name': app.name,
+                                         'index': app.index,
+                                         'icon': app.icon,
+                                         'color': app.color}
 
     return context

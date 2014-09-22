@@ -346,4 +346,7 @@ p {
   #app-header .tethys-app-header .exit-button a {
     padding: 6px 15px;
   }
+  #app-content-wrapper #app-content {
+    padding-top: 80px;
+  }
 }

@@ -9,22 +9,30 @@
 """
 
 
-class AppBase(object):
+class TethysAppBase(object):
     """
     Base class used for building apps
     """
+    name = ''
+    index = ''
+    icon = ''
+    root_url = ''
+    color = ''
+
+    def __repr__(self):
+        """
+        String representation
+        """
+        return '<TethysApp: {0}>'.format(self.name)
+
+    def controllers(self, app):
+        """
+        Must return a list of AppController objects
+        """
+        raise NotImplementedError()
     
-    def register_app(self, app):
+    def persistent_stores(self, controllers):
         """
-        """
-        pass
-    
-    def register_controllers(self, controllers):
-        """
-        """
-        pass
-        
-    def register_persistent_stores(self, persistent_stores):
-        """
+        Should return a list of PersistentStore objects
         """
         pass

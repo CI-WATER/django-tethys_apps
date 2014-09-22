@@ -20,13 +20,14 @@
     {% if apps %}
       <div id="app-list">
         {% for app in apps %}
-          <a class="app-container" href="javascript:void(0);" onclick="TETHYS_APPS_LIBRARY.launch_app(this, '{% url app.index %}');">
+          <a class="app-container" href="javascript:void(0);" onclick="TETHYS_APPS_LIBRARY.launch_app(this, '{% url app.index %}');" data-app-theme-color="{{ app.color }}">
             <div class="app-icon">
               <img {% if app.icon %}src="{% static app.icon %}"{% else %}src="{% static 'tethys_apps/images/default_app_icon.gif' %}"{% endif %} />
             </div>
-            <div class="app-title">
+            <div class="app-title" data-app-theme-color="{{ app.color }}">
               <span>{{ app.name }}</span>
             </div>
+            <div class="color-effect" data-app-theme-color="{{ app.color }}"></div>
           </a>
         {% endfor %}
       </div>

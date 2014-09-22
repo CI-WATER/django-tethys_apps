@@ -18,22 +18,24 @@ def generate_app_url_patterns():
 
     # Get controllers list from app harvester
     harvester = SingletonAppHarvester()
-    controllers = harvester.controllers
-
+    apps = harvester.apps
     app_url_patterns = dict()
 
-    for controller in controllers:
-        app_root = controller['root']
-        app_namespace = app_root.replace('-', '_')
+    for app in apps:
+        controllers = app.controllers()
 
-        if app_namespace not in app_url_patterns:
-            app_url_patterns[app_namespace] = []
+        for controller in controllers:
+            app_root = app.root_url
+            app_namespace = app_root.replace('-', '_')
 
-        # Create django url object
-        django_url = url(controller['url'], controller['controller'], name=controller['name'])
+            if app_namespace not in app_url_patterns:
+                app_url_patterns[app_namespace] = []
 
-        # Append to namespace list
-        app_url_patterns[app_namespace].append(django_url)
+            # Create django url object
+            django_url = url(controller.url, controller.controller, name=controller.name)
+
+            # Append to namespace list
+            app_url_patterns[app_namespace].append(django_url)
 
     return app_url_patterns
 
