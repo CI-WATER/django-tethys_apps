@@ -9,7 +9,6 @@
 """
 
 import os
-import sys
 import inspect
 
 from django.conf import settings
@@ -18,80 +17,9 @@ from sqlalchemy import create_engine
 from tethys_apps.base import TethysAppBase
 
 
-def get_database_manager_url():
-    """
-    Parse tethys_apps.ini and retrieve the database_manager_url
-    """
-    tethys_apps_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    config_path = os.path.join(tethys_apps_path, 'tethys_apps.ini')
-    config = ConfigParser.RawConfigParser()
-    config.read(config_path)
-    return config.get('tethys:main', 'tethys.database_manager_url')
-
-
-def get_existing_database_list():
-    """
-    Returns a list of the existing databases
-    """
-    # Get database manager
-    database_manager_url = get_database_manager_url()
-
-    # Create connection engine
-    engine = create_engine(database_manager_url)
-
-    # Cannot create databases in a transactions
-    # Connect and commit to close transaction
-    connection = engine.connect()
-
-    # Check for Database
-    existing_dbs_statement = '''
-                             SELECT d.datname as name
-                             FROM pg_catalog.pg_database d
-                             LEFT JOIN pg_catalog.pg_user u ON d.datdba = u.usesysid
-                             ORDER BY 1;
-                             '''
-
-    existing_dbs = connection.execute(existing_dbs_statement)
-
-    # Compile list of db names
-    existing_db_names = []
-
-    for existing_db in existing_dbs:
-        existing_db_names.append(existing_db.name)
-
-    return existing_db_names
-
-
-def get_persistent_store_engine(app_name, persistent_store_name):
-    """
-    Returns an sqlalchemy engine for the given store
-    """
-    # Create the unique store name
-    unique_store_name = '_'.join([app_name, persistent_store_name])
-
-    # Check to make sure that the persistent store exists
-    if unique_store_name in get_existing_database_list():
-        # Retrieve the database manager url.
-        # The database manager database user is the owner of all the app databases.
-        database_manager_url = get_database_manager_url()
-        url_parts = database_manager_url.split('/')
-
-
-        # Assemble url for persistent store with that name
-        persistent_store_url = '{0}//{1}/{2}'.format(url_parts[0], url_parts[2], unique_store_name)
-
-        # Return SQLAlchemy Engine
-        return create_engine(persistent_store_url)
-
-    else:
-        print('ERROR: No persisent store "{0}" for app "{1}". Make sure you register the persistent store in app.py '
-              'and reinstall app.'.format(persistent_store_name, app_name))
-        sys.exit(1)
-
-
 class SingletonAppHarvester(object):
     """
-    Collects information for building apps
+    Collects information for initiating apps
     """
 
     apps = []
@@ -179,7 +107,7 @@ class SingletonAppHarvester(object):
                                 valid_app_instance_list.append(validated_app_instance)
 
                                 # Notify user that the app has been loaded
-                                print('Loading {0}'.format(app_package))
+                                print('{0}'.format(app_package))
 
                     except TypeError:
                         '''DO NOTHING'''
@@ -194,11 +122,15 @@ class SingletonAppHarvester(object):
         Provision all persistent stores in the requested_stores property
         """
         # Notify user of database provisioning
-        print('\nProvisioning Persistent Stores...')
+        print('\nProvisioning Persistent Stores:')
 
         # Get database manager url from the config
         database_manager_url = settings.TETHYS_APPS_DATABASE_MANAGER_URL
         database_manager_name = database_manager_url.split('://')[1].split(':')[0]
+
+        #--------------------------------------------------------------------------------------------------------------#
+        # Get a list of existing databases
+        #--------------------------------------------------------------------------------------------------------------#
 
         # Create connection engine
         engine = create_engine(database_manager_url)
@@ -224,7 +156,6 @@ class SingletonAppHarvester(object):
 
         # Get apps and provision persistent stores if not already created
         for app in self.apps:
-
             # Create multiple persistent stores if necessary
             for persistent_store in app.persistent_stores():
                 full_db_name = '_'.join((app.package, persistent_store.name))
@@ -296,20 +227,5 @@ class SingletonAppHarvester(object):
                 initializer = getattr(module, initializer_function)
                 initializer(new_database)
 
-
-
-    def _run_initialization_scripts(self):
-        """
-        Run the initialization scripts
-        """
-        print('Initializing Persistent Stores...')
-
-        for script in self.db_initialization_scripts:
-            # Provide feedback for user
-            print('Running {0}'.format(script))
-
-            # Add the tethysapp namespace
-            script = '.'.join(['tethys_apps.tethysapp',  script])
-
-            # Run the module by importing it
-            __import__(script)
+                #Spacer
+                print('')

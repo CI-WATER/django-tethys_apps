@@ -20,6 +20,7 @@ class AppControllerBase(object):
         """
         Constructor
         """
+        ##TODO: Validate controller object
         self.name = name
         self.url = django_url_preprocessor(url, self.root_url)
         self.controller = '.'.join(['tethys_apps.tethysapp', controller])
