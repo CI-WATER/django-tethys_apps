@@ -30,5 +30,4 @@ def tethys_apps_context(request):
                                          'index': app.index,
                                          'icon': app.icon,
                                          'color': app.color}
-
     return context

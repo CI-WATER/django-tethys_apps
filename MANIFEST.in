@@ -5,3 +5,4 @@ recursive-include tethys_apps/templates *
 recursive-include tethys_apps/tethysapp *
 recursive-include tethys_apps/pastetemplates *
 recursive-include docs *
+recursive-include resources *
