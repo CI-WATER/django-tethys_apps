@@ -147,6 +147,7 @@ class SingletonAppHarvester(object):
                                  '''
 
         existing_dbs = connection.execute(existing_dbs_statement)
+        connection.close()
 
         # Compile list of db names
         existing_db_names = []
@@ -168,6 +169,9 @@ class SingletonAppHarvester(object):
                     # Provide Update for User
                     print('Creating database "{0}" for app "{1}"...'.format(persistent_store.name, app.package))
 
+                    # Cannot create databases in a transaction: connect and commit to close transaction
+                    create_connection = engine.connect()
+
                     # Create db
                     create_db_statement = '''
                                           CREATE DATABASE {0}
@@ -177,8 +181,9 @@ class SingletonAppHarvester(object):
                                           '''.format(full_db_name, database_manager_name)
 
                     # Close transaction first and then execute
-                    connection.execute('commit')
-                    connection.execute(create_db_statement)
+                    create_connection.execute('commit')
+                    create_connection.execute(create_db_statement)
+                    create_connection.close()
 
                 else:
                     # Provide Update for User
@@ -208,7 +213,8 @@ class SingletonAppHarvester(object):
 
                     # Execute postgis statement
                     new_db_connection.execute(enable_postgis_statement)
-                    connection.close()
+                    new_db_connection.close()
+
                 #------------------------------------------------------------------------------------------------------#
                 # 3. Run initialization function here
                 #------------------------------------------------------------------------------------------------------#
