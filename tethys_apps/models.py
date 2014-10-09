@@ -1,4 +1,4 @@
-from tethys_apps.harvesters.app_harvester import SingletonAppHarvester
+from tethys_apps.app_harvester import SingletonAppHarvester
 
 # Perform App Harvesting
 harvester = SingletonAppHarvester()

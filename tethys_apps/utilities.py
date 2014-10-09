@@ -8,7 +8,7 @@ from django.template import TemplateDoesNotExist
 from django.utils._os import safe_join
 from django.utils.datastructures import SortedDict
 
-from tethys_apps.harvesters.app_harvester import SingletonAppHarvester
+from tethys_apps.app_harvester import SingletonAppHarvester
 
 
 def generate_app_url_patterns():

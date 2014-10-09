@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from tethys_apps.harvesters.app_harvester import SingletonAppHarvester
+from tethys_apps.app_harvester import SingletonAppHarvester
 
 
 def library(request):

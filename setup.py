@@ -14,11 +14,11 @@ requires = ['django',
 
 setup(
     name='django-tethys_apps',
-    version='0.1',
+    version='0.1.0',
     packages=['tethys_apps'],
     include_package_data=True,
     license='BSD 2-Clause License',
-    description='An app to enable development and hosting capabilites for Tethys apps',
+    description='An app to enable development and hosting capabilities for Tethys Apps.',
     long_description=README,
     url='',
     author='Nathan Swain',
