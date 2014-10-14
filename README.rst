@@ -4,8 +4,21 @@ Tethys Apps
 
 Tethys apps is an app that adds the capabilities to develop and host Tethys apps within your site.
 
-Configuration
--------------
+Installation
+------------
+
+Tethys Gizmos can be installed via pip or by downloading the source. To install via pip or easy_install::
+
+    pip install django-tethys_apps
+
+To install via download::
+
+    git clone https://github.com/swainn/django-tethys_apps.git
+    cd django-tethys_gizmos
+    python setup.py install
+
+Django Configuration
+--------------------
 
 1. Add "tethys_apps" to your INSTALLED_APPS setting like this::
 
@@ -57,7 +70,7 @@ passwords, you will need them in the next step::
     TETHYS_APPS_DATABASE_MANAGER_URL = 'postgresql://tethys_db_manager:pass@localhost:5432/tethys_db_manager'
     TETHYS_APPS_SUPERUSER = 'postgresql://tethys_super:pass@localhost:5432/tethys_super'
 
-8. Run `python manage.py migrate` to create the database models.
+8. Run **python manage.py migrate** to create the database models.
 
 9. Tethys Apps synthesizes several other django apps. They will be automatically installed when you run the setup script
 but you will need to add the configuration parameters for those apps to your settings file. Rather than duplicate
@@ -66,5 +79,4 @@ django apps (which you can find on git hub):
 
 * `django-tethys_gizmos <https://github.com/swainn/django-tethys_gizmos/blob/master/README.rst>`_
 
-
-4. Visit http://127.0.0.1:8000/apps/ to view the apps library.
+10. Start up the server with **python manage.py runserver** and visit http://127.0.0.1:8000/apps/ to view the apps library.

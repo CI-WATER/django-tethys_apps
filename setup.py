@@ -10,6 +10,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 requires = ['django',
             'PasteScript>=1.3',
             'sqlalchemy',
+            'psycopg2',
             'django-tethys_gizmos']
 
 setup(

@@ -46,6 +46,12 @@ p {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+}
 #app-header .tethys-app-header {
   position: fixed;
   background: #1b95dc;
