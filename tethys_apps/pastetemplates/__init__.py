@@ -58,10 +58,6 @@ class TethysAppTemplate(Template):
         PREFIX_NO_DASH = 'tethysapp'
 
         if not vars['project'].startswith(PREFIX):
-            vars['project'] = '{0}{1}'.format(PREFIX, vars['project'])
-            vars['egg'] = '{0}_{1}'.format(PREFIX_NO_DASH, vars['egg'])
-            vars['package'] = '{0}{1}'.format(PREFIX_NO_DASH, vars['package'])
-            print vars
             print('\nError: Expected the project name to start with "{0}". Please add the "{0}" '
                   'as a prefix and try again'.format(PREFIX))
             sys.exit(1)

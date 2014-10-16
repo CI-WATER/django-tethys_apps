@@ -37,7 +37,8 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
     entry_points = {
-        'paste.paster_create_template': ['tethys_app_scaffold=tethys_apps.pastetemplates:TethysAppTemplate',]
+        'console_scripts': ['tethys=tethys_apps.cli:tethys_command',],
+        'paste.paster_create_template': ['tethys_app_scaffold=tethys_apps.pastetemplates:TethysAppTemplate',],
     },
     install_requires = requires,
 )

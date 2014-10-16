@@ -80,3 +80,6 @@ django apps (which you can find on git hub):
 * `django-tethys_gizmos <https://github.com/swainn/django-tethys_gizmos/blob/master/README.rst>`_
 
 10. Start up the server with **python manage.py runserver** and visit http://127.0.0.1:8000/apps/ to view the apps library.
+
+Quick Start
+-----------
