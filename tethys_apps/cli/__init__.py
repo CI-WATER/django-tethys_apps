@@ -1,6 +1,8 @@
 # Commandline interface for Tethys
 import argparse
 import subprocess
+import os
+import shutil
 
 GEN_SETTINGS_OPTION = 'settings'
 VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION,)
@@ -24,7 +26,24 @@ def generate_command(args):
     """
     Generate a settings file for a new installation.
     """
-    print(args.type)
+    # Determine template path
+    gen_templates_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'gen_templates')
+    template_path = os.path.join(gen_templates_dir, args.type)
+
+    # Determine destination file name (defaults to type name)
+    destination_file = args.type
+
+    # Settings file destination
+    if args.type == GEN_SETTINGS_OPTION:
+        destination_file = '{0}.py'.format(args.type)
+
+    # Default destination path is the current working directory
+    cwd = os.getcwd()
+    destination_path = os.path.join(cwd, destination_file)
+
+    print(template_path, destination_path)
+    # Perform the copy
+    shutil.copy(template_path, destination_path)
 
 
 def start_dev_server_command(args):
