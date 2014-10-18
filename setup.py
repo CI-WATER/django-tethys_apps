@@ -13,9 +13,11 @@ requires = ['django',
             'psycopg2',
             'django-tethys_gizmos']
 
+version = '0.1.0'
+
 setup(
     name='django-tethys_apps',
-    version='0.1.0',
+    version=version,
     packages=['tethys_apps'],
     include_package_data=True,
     license='BSD 2-Clause License',
