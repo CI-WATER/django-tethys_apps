@@ -91,7 +91,6 @@ def generate_command(args):
             f.write(template.render(context))
 
 
-
 def start_dev_server_command(args):
     """
     Start up the development server.

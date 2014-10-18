@@ -74,7 +74,7 @@ passwords, you will need them in the next step::
 
 9. Tethys Apps synthesizes several other django apps. They will be automatically installed when you run the setup script
 but you will need to add the configuration parameters for those apps to your settings file. Rather than duplicate
-the documentation for configuration of those apps here, please refer to the readme's for ecah of the following
+the documentation for configuration of those apps here, please refer to the readme's for each of the following
 django apps (which you can find on git hub):
 
 * `django-tethys_gizmos <https://github.com/swainn/django-tethys_gizmos/blob/master/README.rst>`_
