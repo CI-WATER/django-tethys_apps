@@ -65,9 +65,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-ROOT_URLCONF = 'tethys_site.urls'
+ROOT_URLCONF = 'tethys_portal.urls'
 
-WSGI_APPLICATION = 'tethys_site.wsgi.application'
+WSGI_APPLICATION = 'tethys_portal.wsgi.application'
 
 
 # Database
