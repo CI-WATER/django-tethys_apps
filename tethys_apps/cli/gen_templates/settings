@@ -150,8 +150,8 @@ TEMPLATE_CONTEXT_PROCESSORS = ('django.contrib.auth.context_processors.auth',
                                'tethys_gizmos.context_processors.tethys_gizmos_context')
 
 # Tethys App Persistent Stores Settings
-TETHYS_APPS_DATABASE_MANAGER_URL = 'postgresql://tethys_db_manager:tethyspass@localhost:5432/tethys_db_manager'
-TETHYS_APPS_SUPERUSER = 'postgresql://tethys_super:tethyspass@localhost:5432/tethys_super'
+TETHYS_APPS_DATABASE_MANAGER_URL = 'postgresql://tethys_db_manager:pass@localhost:5432/tethys_db_manager'
+TETHYS_APPS_SUPERUSER_URL = 'postgresql://tethys_super:pass@localhost:5432/tethys_super'
 
 # Tethys Gizmos Settings
 TETHYS_GIZMOS_GOOGLE_MAPS_API_KEY = ''

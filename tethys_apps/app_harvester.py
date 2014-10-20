@@ -198,7 +198,7 @@ class SingletonAppHarvester(object):
                 #------------------------------------------------------------------------------------------------------#
                 if persistent_store.postgis:
                     # Get URL for Tethys Superuser to enable extensions
-                    super_url = settings.TETHYS_APPS_SUPERUSER
+                    super_url = settings.TETHYS_APPS_SUPERUSER_URL
                     super_parts = super_url.split('/')
                     new_db_url = '{0}//{1}/{2}'.format(super_parts[0], super_parts[2], full_db_name)
 
