@@ -7,7 +7,7 @@ Tethys apps is an app that adds the capabilities to develop and host Tethys apps
 Installation
 ------------
 
-Tethys Gizmos can be installed via pip or by downloading the source. To install via pip or easy_install::
+Tethys Apps can be installed via pip or by downloading the source. To install via pip or easy_install::
 
     pip install django-tethys_apps
 
