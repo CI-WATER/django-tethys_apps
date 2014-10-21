@@ -161,17 +161,20 @@ var TETHYS_APPS_LIBRARY = (function() {
 	    //app_theme_effects();
 
 	    // The Tethys apps library page uses masonry.js to accomplish the Pinterest-like stacking of the app icons
-        msnry = new Masonry( app_list_container, {
-          // options
-          columnWidth: 240,
-          itemSelector: app_item_selector
-        });
+	    // Initialize the msnry object if there are any apps in the list.
+	    if ( $(app_item_selector).length > 0 ) {
+          msnry = new Masonry( app_list_container, {
+            // options
+            columnWidth: 240,
+            itemSelector: app_item_selector
+          });
 
-        // If the app icon images take some time to load, it may mess up the masonry formatting. This modules uses the
-        // imagesloaded.js project to reformat the masonry after all the images have loaded.
-        imagesLoaded( app_list_container, function() {
-          msnry.layout();
-        });
+          // If the app icon images take some time to load, it may mess up the masonry formatting. This modules uses the
+          // imagesloaded.js project to reformat the masonry after all the images have loaded.
+          imagesLoaded( app_list_container, function() {
+            msnry.layout();
+          });
+        }
 
         // Check for app exit
         app_exit_handler();

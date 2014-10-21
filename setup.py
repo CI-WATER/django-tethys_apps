@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open(os.path.join(os.path.dirname(__file__), 'README.rst')) as readme:
     README = readme.read()
@@ -13,12 +13,12 @@ requires = ['django',
             'psycopg2',
             'django-tethys_gizmos']
 
-version = '0.1.3'
+version = '0.1.5'
 
 setup(
     name='django-tethys_apps',
     version=version,
-    packages=['tethys_apps'],
+    packages=find_packages(),
     include_package_data=True,
     license='BSD 2-Clause License',
     description='An app to enable development and hosting capabilities for Tethys Apps.',

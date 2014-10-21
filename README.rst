@@ -68,7 +68,7 @@ passwords, you will need them in the next step::
 --Not the Django ORM--for database communication). Replace "pass" with the passwords you gave the users::
 
     TETHYS_APPS_DATABASE_MANAGER_URL = 'postgresql://tethys_db_manager:pass@localhost:5432/tethys_db_manager'
-    TETHYS_APPS_SUPERUSER = 'postgresql://tethys_super:pass@localhost:5432/tethys_super'
+    TETHYS_APPS_SUPERUSER_URL = 'postgresql://tethys_super:pass@localhost:5432/tethys_super'
 
 8. Run **python manage.py migrate** to create the database models.
 
