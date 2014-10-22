@@ -11,6 +11,7 @@ from django.conf import settings
 # Module level variables
 GEN_SETTINGS_OPTION = 'settings'
 VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION,)
+DEFAULT_INSTALLATION_DIRECTORY = '/usr/lib/tethys/src'
 
 # Setup Django settings
 settings.configure()
@@ -75,7 +76,7 @@ def generate_command(args):
         valid_inputs = ('y', 'n', 'yes', 'no')
         no_inputs = ('n', 'no')
 
-        overwrite_input = raw_input('Warning, "{0}" already exists. '
+        overwrite_input = raw_input('Warning: "{0}" already exists. '
                                     'Overwrite? (y/n): '.format(destination_file)).lower()
 
         while overwrite_input not in valid_inputs:
@@ -91,11 +92,45 @@ def generate_command(args):
             f.write(template.render(context))
 
 
-def start_dev_server_command(args):
+def manage_command(args):
     """
     Start up the development server.
     """
-    print 'start'
+    # Determine path to manage.py file
+    manage_path = os.path.join(DEFAULT_INSTALLATION_DIRECTORY, 'manage.py')
+
+    # Check for path option
+    if args.manage:
+        manage_path = args.manage
+
+        # Throw error if path is not valid
+        if not os.path.isfile(manage_path):
+            print('Error: Can\'t open file "{0}", no such file.'.format(manage_path))
+            exit(1)
+
+    elif not os.path.isfile(manage_path):
+        # Throw error if default path is not valid
+        print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
+              'option to provide the path to the location of the "manage.py" file.')
+        exit(1)
+
+    # Run the command
+    if args.command == 'start':
+        if args.port:
+            process = ['python', manage_path, 'runserver', str(args.port)]
+        else:
+            process = ['python', manage_path, 'runserver']
+    elif args.command == 'syncdb':
+        process = ['python', manage_path, 'syncdb']
+    else:
+        process = None
+
+    # Call the process with a little trick to ignore the keyboard interrupt error when it happens
+    if process:
+        try:
+            subprocess.call(process)
+        except KeyboardInterrupt:
+            pass
 
 
 def tethys_command():
@@ -119,8 +154,11 @@ def tethys_command():
     gen_parser.set_defaults(func=generate_command)
 
     # Setup start server parsers
-    start_parser = subparsers.add_parser('start', help='Shortcut for starting Tethys development server.')
-    start_parser.set_defaults(func=start_dev_server_command)
+    manage_parser = subparsers.add_parser('manage', help='Management commands for Tethys Platform.')
+    manage_parser.add_argument('command', help='Management command to run.', choices=['start', 'syncdb'])
+    manage_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
+    manage_parser.add_argument('-p', '--port', type=int, help='Port on which to start the development server.')
+    manage_parser.set_defaults(func=manage_command)
 
     # Parse the args and call the default function
     args = parser.parse_args()
