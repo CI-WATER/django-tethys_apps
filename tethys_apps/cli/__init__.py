@@ -12,6 +12,7 @@ from django.conf import settings
 GEN_SETTINGS_OPTION = 'settings'
 VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION,)
 DEFAULT_INSTALLATION_DIRECTORY = '/usr/lib/tethys/src'
+DEVELOPMENT_DIRECTORY = '/usr/lib/tethys/tethys'
 
 # Setup Django settings
 settings.configure()
@@ -109,10 +110,14 @@ def manage_command(args):
             exit(1)
 
     elif not os.path.isfile(manage_path):
+        # Try the development path version
+        manage_path = os.path.join(DEVELOPMENT_DIRECTORY, 'manage.py')
+
         # Throw error if default path is not valid
-        print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
-              'option to provide the path to the location of the "manage.py" file.')
-        exit(1)
+        if not os.path.isfile(manage_path):
+            print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
+                  'option to provide the path to the location of the "manage.py" file.')
+            exit(1)
 
     # Run the command
     if args.command == 'start':
