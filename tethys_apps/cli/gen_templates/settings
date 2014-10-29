@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'django_gravatar',
     'social_auth',
     'bootstrap3',
+    'tethys_config',
     'tethys_apps',
     'tethys_gizmos',
 )
