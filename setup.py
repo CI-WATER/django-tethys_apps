@@ -13,7 +13,7 @@ requires = ['django',
             'psycopg2',
             'django-tethys_gizmos']
 
-version = '0.3.0'
+version = '0.3.2'
 
 setup(
     name='django-tethys_apps',

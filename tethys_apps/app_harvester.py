@@ -215,9 +215,11 @@ class SingletonAppHarvester(object):
                     new_db_connection.execute(enable_postgis_statement)
                     new_db_connection.close()
 
-                #------------------------------------------------------------------------------------------------------#
-                # 3. Run initialization function here
-                #------------------------------------------------------------------------------------------------------#
+            #----------------------------------------------------------------------------------------------------------#
+            # 3. Run initialization functions for each store here
+            #----------------------------------------------------------------------------------------------------------#
+            for persistent_store in app.persistent_stores():
+
                 print('Initialize database "{0}" for app "{1}"'.format(persistent_store.name, app.package))
 
                 # Split into module name and function name
@@ -233,5 +235,5 @@ class SingletonAppHarvester(object):
                 initializer = getattr(module, initializer_function)
                 initializer(new_database)
 
-                #Spacer
-                print('')
+            #Spacer
+            print('')
