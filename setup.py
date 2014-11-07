@@ -11,9 +11,10 @@ requires = ['django',
             'PasteScript>=1.3',
             'sqlalchemy',
             'psycopg2',
-            'django-tethys_gizmos']
+            'django-tethys_gizmos',
+            'django-tethys_datasets']
 
-version = '0.3.3'
+version = '0.4.0'
 
 setup(
     name='django-tethys_apps',

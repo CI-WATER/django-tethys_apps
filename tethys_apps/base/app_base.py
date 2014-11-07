@@ -33,6 +33,12 @@ class TethysAppBase(object):
     
     def persistent_stores(self, controllers):
         """
-        Should return a list of PersistentStore objects
+        May return a list of PersistentStore objects
         """
-        pass
+        return None
+
+    def dataset_services(self):
+        """
+        May return a list of DatasetService objects
+        """
+        return None
