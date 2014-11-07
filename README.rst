@@ -14,7 +14,7 @@ Tethys Apps can be installed via pip or by downloading the source. To install vi
 To install via download::
 
     git clone https://github.com/CI-WATER/django-tethys_apps.git
-    cd django-tethys_gizmos
+    cd django-tethys_apps
     python setup.py install
 
 Django Configuration
