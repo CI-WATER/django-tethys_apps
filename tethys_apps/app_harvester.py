@@ -158,82 +158,85 @@ class SingletonAppHarvester(object):
         # Get apps and provision persistent stores if not already created
         for app in self.apps:
             # Create multiple persistent stores if necessary
-            for persistent_store in app.persistent_stores():
-                full_db_name = '_'.join((app.package, persistent_store.name))
-                new_database = True
+            persistent_stores = app.persistent_stores()
+
+            if persistent_stores:
+                for persistent_store in persistent_stores:
+                    full_db_name = '_'.join((app.package, persistent_store.name))
+                    new_database = True
+
+                    #--------------------------------------------------------------------------------------------------#
+                    # 1. Create the database if it does not already exist
+                    #--------------------------------------------------------------------------------------------------#
+                    if full_db_name not in existing_db_names:
+                        # Provide Update for User
+                        print('Creating database "{0}" for app "{1}"...'.format(persistent_store.name, app.package))
+
+                        # Cannot create databases in a transaction: connect and commit to close transaction
+                        create_connection = engine.connect()
+
+                        # Create db
+                        create_db_statement = '''
+                                              CREATE DATABASE {0}
+                                              WITH OWNER {1}
+                                              TEMPLATE template0
+                                              ENCODING 'UTF8'
+                                              '''.format(full_db_name, database_manager_name)
+
+                        # Close transaction first and then execute
+                        create_connection.execute('commit')
+                        create_connection.execute(create_db_statement)
+                        create_connection.close()
+
+                    else:
+                        # Provide Update for User
+                        print('Database "{0}" already exists for app "{1}", skipping...'.format(persistent_store.name,
+                                                                                                app.package))
+
+                        # Set var that is passed to initialization functions
+                        new_database = False
+
+                    #--------------------------------------------------------------------------------------------------#
+                    # 2. Enable PostGIS extension
+                    #--------------------------------------------------------------------------------------------------#
+                    if persistent_store.postgis:
+                        # Get URL for Tethys Superuser to enable extensions
+                        super_url = settings.TETHYS_APPS_SUPERUSER_URL
+                        super_parts = super_url.split('/')
+                        new_db_url = '{0}//{1}/{2}'.format(super_parts[0], super_parts[2], full_db_name)
+
+                        # Connect to new database
+                        new_db_engine = create_engine(new_db_url)
+                        new_db_connection = new_db_engine.connect()
+
+                        # Notify user
+                        print('Enabling PostGIS on database "{0}" for app "{1}"...'.format(persistent_store.name,
+                                                                                           app.package))
+                        enable_postgis_statement = 'CREATE EXTENSION IF NOT EXISTS postgis'
+
+                        # Execute postgis statement
+                        new_db_connection.execute(enable_postgis_statement)
+                        new_db_connection.close()
 
                 #------------------------------------------------------------------------------------------------------#
-                # 1. Create the database if it does not already exist
+                # 3. Run initialization functions for each store here
                 #------------------------------------------------------------------------------------------------------#
-                if full_db_name not in existing_db_names:
-                    # Provide Update for User
-                    print('Creating database "{0}" for app "{1}"...'.format(persistent_store.name, app.package))
+                for persistent_store in persistent_stores:
 
-                    # Cannot create databases in a transaction: connect and commit to close transaction
-                    create_connection = engine.connect()
+                    print('Initialize database "{0}" for app "{1}"'.format(persistent_store.name, app.package))
 
-                    # Create db
-                    create_db_statement = '''
-                                          CREATE DATABASE {0}
-                                          WITH OWNER {1}
-                                          TEMPLATE template0
-                                          ENCODING 'UTF8'
-                                          '''.format(full_db_name, database_manager_name)
+                    # Split into module name and function name
+                    initializer_mod, initializer_function = persistent_store.initializer.split(':')
 
-                    # Close transaction first and then execute
-                    create_connection.execute('commit')
-                    create_connection.execute(create_db_statement)
-                    create_connection.close()
+                    # Pre-process initializer path
+                    initializer_path = '.'.join(('tethys_apps.tethysapp', app.package, initializer_mod))
 
-                else:
-                    # Provide Update for User
-                    print('Database "{0}" already exists for app "{1}", skipping...'.format(persistent_store.name,
-                                                                                            app.package))
+                    # Import module
+                    module = __import__(initializer_path, fromlist=[initializer_function])
 
-                    # Set var that is passed to initialization functions
-                    new_database = False
-
-                #------------------------------------------------------------------------------------------------------#
-                # 2. Enable PostGIS extension
-                #------------------------------------------------------------------------------------------------------#
-                if persistent_store.postgis:
-                    # Get URL for Tethys Superuser to enable extensions
-                    super_url = settings.TETHYS_APPS_SUPERUSER_URL
-                    super_parts = super_url.split('/')
-                    new_db_url = '{0}//{1}/{2}'.format(super_parts[0], super_parts[2], full_db_name)
-
-                    # Connect to new database
-                    new_db_engine = create_engine(new_db_url)
-                    new_db_connection = new_db_engine.connect()
-
-                    # Notify user
-                    print('Enabling PostGIS on database "{0}" for app "{1}"...'.format(persistent_store.name,
-                                                                                       app.package))
-                    enable_postgis_statement = 'CREATE EXTENSION IF NOT EXISTS postgis'
-
-                    # Execute postgis statement
-                    new_db_connection.execute(enable_postgis_statement)
-                    new_db_connection.close()
-
-            #----------------------------------------------------------------------------------------------------------#
-            # 3. Run initialization functions for each store here
-            #----------------------------------------------------------------------------------------------------------#
-            for persistent_store in app.persistent_stores():
-
-                print('Initialize database "{0}" for app "{1}"'.format(persistent_store.name, app.package))
-
-                # Split into module name and function name
-                initializer_mod, initializer_function = persistent_store.initializer.split(':')
-
-                # Pre-process initializer path
-                initializer_path = '.'.join(('tethys_apps.tethysapp', app.package, initializer_mod))
-
-                # Import module
-                module = __import__(initializer_path, fromlist=[initializer_function])
-
-                # Get the function
-                initializer = getattr(module, initializer_function)
-                initializer(new_database)
+                    # Get the function
+                    initializer = getattr(module, initializer_function)
+                    initializer(new_database)
 
             #Spacer
             print('')

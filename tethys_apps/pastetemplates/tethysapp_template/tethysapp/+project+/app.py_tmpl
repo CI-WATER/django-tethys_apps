@@ -1,4 +1,4 @@
-from tethys_apps.base import TethysAppBase, PersistentStore, app_controller_maker
+from tethys_apps.base import TethysAppBase, app_controller_maker
 
 
 class {{proper_no_spaces}}(TethysAppBase):
@@ -26,15 +26,3 @@ class {{proper_no_spaces}}(TethysAppBase):
         )
 
         return controllers
-
-    def persistent_stores(self):
-        """
-        Add persistent stores
-        """
-        stores = (PersistentStore(name='primary',
-                                  initializer='init_stores:init_primary',
-                                  postgis=True
-                  ),
-        )
-
-        return stores

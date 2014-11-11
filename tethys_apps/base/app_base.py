@@ -31,7 +31,7 @@ class TethysAppBase(object):
         """
         raise NotImplementedError()
     
-    def persistent_stores(self, controllers):
+    def persistent_stores(self):
         """
         May return a list of PersistentStore objects
         """
