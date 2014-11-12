@@ -199,7 +199,7 @@ class SingletonAppHarvester(object):
                     #--------------------------------------------------------------------------------------------------#
                     # 2. Enable PostGIS extension
                     #--------------------------------------------------------------------------------------------------#
-                    if persistent_store.postgis:
+                    if (hasattr(persistent_store, 'spatial') and persistent_store.spatial) or persistent_store.postgis:
                         # Get URL for Tethys Superuser to enable extensions
                         super_url = settings.TETHYS_APPS_SUPERUSER_URL
                         super_parts = super_url.split('/')

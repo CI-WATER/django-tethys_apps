@@ -19,7 +19,7 @@ class PersistentStore(object):
     An object that stores the data for a Tethys Persistent store
     """
 
-    def __init__(self, name, initializer, postgis=False):
+    def __init__(self, name, initializer, postgis=False, spatial=False):
         """
         Constructor
         """
@@ -28,14 +28,20 @@ class PersistentStore(object):
         self.name = name
         self.initializer = initializer
         self.postgis = postgis
+        self.spatial = spatial
 
     def __repr__(self):
         """
         String representation
         """
-        return '<Persistent Store: name={0}, initializer={1}, postgis={2}>'.format(self.name,
-                                                                                   self.initializer,
-                                                                                   self.postgis)
+        if hasattr(self, 'spatial'):
+            return '<Persistent Store: name={0}, initializer={1}, spatial={2}>'.format(self.name,
+                                                                                       self.initializer,
+                                                                                       self.spatial)
+        else:
+            return '<Persistent Store: name={0}, initializer={1}, spatial={2}>'.format(self.name,
+                                                                                       self.initializer,
+                                                                                       self.postgis)
 
 
 def get_persistent_store_engine(app_name, persistent_store_name):
