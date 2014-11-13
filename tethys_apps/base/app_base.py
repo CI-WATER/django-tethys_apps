@@ -25,9 +25,9 @@ class TethysAppBase(object):
         """
         return '<TethysApp: {0}>'.format(self.name)
 
-    def controllers(self, app):
+    def url_map(self):
         """
-        Must return a list of AppController objects
+        Must return a list of UrlMap objects
         """
         raise NotImplementedError()
     

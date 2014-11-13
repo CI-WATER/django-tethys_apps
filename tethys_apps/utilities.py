@@ -25,20 +25,26 @@ def generate_app_url_patterns():
     app_url_patterns = dict()
 
     for app in apps:
-        controllers = app.controllers()
+        if hasattr(app, 'url_maps'):
+            url_maps = app.url_maps()
+        elif hasattr(app, 'controllers'):
+            url_maps = app.controllers()
+        else:
+            url_maps = None
 
-        for controller in controllers:
-            app_root = app.root_url
-            app_namespace = app_root.replace('-', '_')
+        if url_maps:
+            for url_map in url_maps:
+                app_root = app.root_url
+                app_namespace = app_root.replace('-', '_')
 
-            if app_namespace not in app_url_patterns:
-                app_url_patterns[app_namespace] = []
+                if app_namespace not in app_url_patterns:
+                    app_url_patterns[app_namespace] = []
 
-            # Create django url object
-            django_url = url(controller.url, controller.controller, name=controller.name)
+                # Create django url object
+                django_url = url(url_map.url, url_map.controller, name=url_map.name)
 
-            # Append to namespace list
-            app_url_patterns[app_namespace].append(django_url)
+                # Append to namespace list
+                app_url_patterns[app_namespace].append(django_url)
 
     return app_url_patterns
 

@@ -1,9 +1,9 @@
-from tethys_apps.base import TethysAppBase, app_controller_maker
+from tethys_apps.base import TethysAppBase, url_map_maker
 
 
 class {{proper_no_spaces}}(TethysAppBase):
     """
-    Tethys App Class for {{proper_name}}.
+    Tethys app class for {{proper_name}}.
     """
 
     name = '{{proper_name}}'
@@ -13,16 +13,15 @@ class {{proper_no_spaces}}(TethysAppBase):
     root_url = '{{project_url}}'
     color = '{{color}}'
         
-    def controllers(self):
+    def url_maps(self):
         """
         Add controllers
         """
-        AppController = app_controller_maker(self.root_url)
+        UrlMap = url_map_maker(self.root_url)
 
-        controllers = (AppController(name='home',
-                                     url='{{project_url}}',
-                                     controller='{{project}}.controllers.home'
-                       ),
+        url_maps = (UrlMap(name='home',
+                           url='{{project_url}}',
+                           controller='{{project}}.controllers.home'),
         )
 
-        return controllers
+        return url_maps
