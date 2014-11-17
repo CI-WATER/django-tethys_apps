@@ -14,7 +14,7 @@ requires = ['django',
             'django-tethys_gizmos',
             'django-tethys_datasets']
 
-version = '0.6.0'
+version = '0.6.1'
 
 
 setup(
