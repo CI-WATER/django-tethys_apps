@@ -8,6 +8,8 @@ import string
 from django.template import Template, Context
 from django.conf import settings
 
+from tethys_apps.terminal_colors import TerminalColors
+
 # Module level variables
 GEN_SETTINGS_OPTION = 'settings'
 VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION,)
@@ -16,6 +18,35 @@ DEVELOPMENT_DIRECTORY = '/usr/lib/tethys/tethys'
 
 # Setup Django settings
 settings.configure()
+
+
+def get_manage_path(args):
+    """
+    Validate user defined manage path, use default, or throw error
+    """
+    # Determine path to manage.py file
+    manage_path = os.path.join(DEFAULT_INSTALLATION_DIRECTORY, 'manage.py')
+
+    # Check for path option
+    if args.manage:
+        manage_path = args.manage
+
+        # Throw error if path is not valid
+        if not os.path.isfile(manage_path):
+            print('Error: Can\'t open file "{0}", no such file.'.format(manage_path))
+            exit(1)
+
+    elif not os.path.isfile(manage_path):
+        # Try the development path version
+        manage_path = os.path.join(DEVELOPMENT_DIRECTORY, 'manage.py')
+
+        # Throw error if default path is not valid
+        if not os.path.isfile(manage_path):
+            print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
+                  'option to provide the path to the location of the "manage.py" file.')
+            exit(1)
+
+    return manage_path
 
 
 def scaffold_command(args):
@@ -95,31 +126,14 @@ def generate_command(args):
 
 def manage_command(args):
     """
-    Start up the development server.
+    Management commands.
     """
-    # Determine path to manage.py file
-    manage_path = os.path.join(DEFAULT_INSTALLATION_DIRECTORY, 'manage.py')
+    # Get the path to manage.py
+    manage_path = get_manage_path(args)
 
-    # Check for path option
-    if args.manage:
-        manage_path = args.manage
+    # Define the process to be run
+    process = None
 
-        # Throw error if path is not valid
-        if not os.path.isfile(manage_path):
-            print('Error: Can\'t open file "{0}", no such file.'.format(manage_path))
-            exit(1)
-
-    elif not os.path.isfile(manage_path):
-        # Try the development path version
-        manage_path = os.path.join(DEVELOPMENT_DIRECTORY, 'manage.py')
-
-        # Throw error if default path is not valid
-        if not os.path.isfile(manage_path):
-            print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
-                  'option to provide the path to the location of the "manage.py" file.')
-            exit(1)
-
-    # Run the command
     if args.command == 'start':
         if args.port:
             process = ['python', manage_path, 'runserver', str(args.port)]
@@ -127,8 +141,6 @@ def manage_command(args):
             process = ['python', manage_path, 'runserver']
     elif args.command == 'syncdb':
         process = ['python', manage_path, 'syncdb']
-    else:
-        process = None
 
     # Call the process with a little trick to ignore the keyboard interrupt error when it happens
     if process:
@@ -136,6 +148,44 @@ def manage_command(args):
             subprocess.call(process)
         except KeyboardInterrupt:
             pass
+
+
+def syncstores_command(args):
+    """
+    Sync persistent stores.
+    """
+    # Get the path to manage.py
+    manage_path = get_manage_path(args)
+
+    # This command is a wrapper for a custom Django manage.py method called syncstores.
+    # See tethys_apps.mangement.commands.syncstores
+    process = ['python', manage_path, 'syncstores']
+
+    if args.refresh:
+        valid_inputs = ('y', 'n', 'yes', 'no')
+        no_inputs = ('n', 'no')
+        proceed = raw_input('{1}Warning:{2} You have specified the database refresh option. This will drop all of the '
+                            'databases for the following apps: {0}. This could result in significant data loss and '
+                            'cannot be undone. Do you wish to continue? (y/n): '.format(', '.join(args.app),
+                                                                                        TerminalColors.WARNING,
+                                                                                        TerminalColors.ENDC)).lower()
+
+        while proceed not in valid_inputs:
+            proceed = raw_input('Invalid option. Do you wish to continue? (y/n): ').lower()
+
+        if proceed not in no_inputs:
+            process.extend(['-r'])
+        else:
+            print('Operation cancelled by user.')
+            exit(0)
+
+    if args.app:
+        process.extend(args.app)
+
+    try:
+        subprocess.call(process)
+    except KeyboardInterrupt:
+        pass
 
 
 def tethys_command():
@@ -146,7 +196,7 @@ def tethys_command():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(title='Commands')
 
-    # Setup scaffold parsers
+    # Setup scaffold command
     scaffold_parser = subparsers.add_parser('scaffold', help='Create a new Tethys app project from a scaffold.')
     scaffold_parser.add_argument('name', help='The name of the new Tethys app project to create.')
     scaffold_parser.set_defaults(func=scaffold_command)
@@ -158,12 +208,25 @@ def tethys_command():
     gen_parser.add_argument('-d', '--directory', help='Destination directory for the generated object.')
     gen_parser.set_defaults(func=generate_command)
 
-    # Setup start server parsers
+    # Setup start server command
     manage_parser = subparsers.add_parser('manage', help='Management commands for Tethys Platform.')
     manage_parser.add_argument('command', help='Management command to run.', choices=['start', 'syncdb'])
     manage_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
     manage_parser.add_argument('-p', '--port', type=int, help='Port on which to start the development server.')
     manage_parser.set_defaults(func=manage_command)
+
+    # Sync stores command
+    syncstores_parser = subparsers.add_parser('syncstores', help='Management command for App Persistent Stores.')
+    syncstores_parser.add_argument('app', help='Name of the app project whose persistent stores will be synced.',
+                                   nargs='+')
+    syncstores_parser.add_argument('-r', '--refresh',
+                                   help='When called with this option, the tables will be dropped prior to syncing'
+                                        ' resulting in a refreshed database.',
+                                   action='store_true',
+                                   dest='refresh')
+    syncstores_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
+    syncstores_parser.set_defaults(func=syncstores_command, refresh=False)
+
 
     # Parse the args and call the default function
     args = parser.parse_args()

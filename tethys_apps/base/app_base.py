@@ -18,6 +18,7 @@ class TethysAppBase(object):
     icon = ''
     root_url = ''
     color = ''
+    package = ''
 
     def __repr__(self):
         """

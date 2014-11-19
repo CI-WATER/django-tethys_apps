@@ -14,7 +14,7 @@ requires = ['django',
             'django-tethys_gizmos',
             'django-tethys_datasets']
 
-version = '0.6.1'
+version = '0.7.0'
 
 
 setup(
@@ -45,4 +45,5 @@ setup(
         'paste.paster_create_template': ['tethys_app_scaffold=tethys_apps.pastetemplates:TethysAppTemplate',],
     },
     install_requires = requires,
+    test_suite = "tethys_apps.tests",
 )
