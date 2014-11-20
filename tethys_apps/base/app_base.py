@@ -11,14 +11,22 @@
 
 class TethysAppBase(object):
     """
-    Base class used for building apps
+    Base class used to define the app class for Tethys apps.
+
+    Attributes:
+      name(string): Name of the app.
+      index(string): Lookup term for the index URL of the app.
+      icon(string): Location of the image to use for the app icon.
+      package(string): Name of the app package.
+      root_url(string): Root URL of the app.
+      color(string): App theme color as RGB hexadecimal.
     """
     name = ''
     index = ''
     icon = ''
+    package = ''
     root_url = ''
     color = ''
-    package = ''
 
     def __repr__(self):
         """
@@ -28,18 +36,27 @@ class TethysAppBase(object):
 
     def url_map(self):
         """
-        Must return a list of UrlMap objects
+        Use this method to define the URL Maps for your app.
+
+        Returns:
+          iterable: A list or tuple of UrlMap objects.
         """
         raise NotImplementedError()
     
     def persistent_stores(self):
         """
-        May return a list of PersistentStore objects
+        Define this method to register persistent store databases for your app. You may define up to 5 persistent stores for an app.
+
+        Returns:
+          iterable: A list or tuple of PersistentStore objects. A persistent store database will be created for each object.
         """
         return None
 
     def dataset_services(self):
         """
-        May return a list of DatasetService objects
+        Use this method to define dataset service connections for use in your app.
+
+        Returns:
+          iterable: A list or tuple of DatasetService objects.
         """
         return None

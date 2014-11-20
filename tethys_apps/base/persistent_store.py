@@ -16,10 +16,17 @@ from sqlalchemy import create_engine
 
 class PersistentStore(object):
     """
-    An object that stores the data for a Tethys Persistent store
+    An object that stores the registration data for a Tethys Persistent Store.
+
+    Args:
+      name(string): The name of the persistent store.
+      initializer(string): Path to the initialization function for the persistent store. Use dot-notation with a colon delineating the function (e.g.: "foo.bar:function").
+      spatial(bool, optional): PostGIS spatial extension will be enabled on the persistent store if True. Defaults to False.
+      postgis(bool, deprecated): PostGIS spatial extension will be enabled on the persistent store if True. Defaults to False. Deprecated, use spatial instead.
+
     """
 
-    def __init__(self, name, initializer, postgis=False, spatial=False):
+    def __init__(self, name, initializer, spatial=False, postgis=False):
         """
         Constructor
         """
@@ -46,7 +53,14 @@ class PersistentStore(object):
 
 def get_persistent_store_engine(app_name, persistent_store_name):
     """
-    Returns an sqlalchemy engine for the given store
+    Creates an SQLAlchemy engine object for the app and persistent store given.
+
+    Args:
+      app_name(string): Name of the app to which the persistent store belongs. More specifically, the app package name.
+      persistent_store_name(string): Name of the persistent store for which to retrieve the engine.
+
+    Returns:
+      object: An SQLAlchemy engine object for the persistent store requested.
     """
     # Create the unique store name
     unique_store_name = '_'.join([app_name, persistent_store_name])
