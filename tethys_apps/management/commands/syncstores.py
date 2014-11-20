@@ -5,6 +5,7 @@ from tethys_apps.app_harvester import SingletonAppHarvester
 from tethys_apps.terminal_colors import TerminalColors
 from sqlalchemy import create_engine
 
+ALL_APPS = 'all'
 
 class Command(BaseCommand):
     """
@@ -17,6 +18,14 @@ class Command(BaseCommand):
                     default=False,
                     help='When called with this option, the database will be dropped prior to syncing resulting in a '
                          'refreshed database.'),
+        make_option('-f', '--firsttime',
+                    action='store_true',
+                    dest='first_time',
+                    default=False,
+                    help='Call with this option to force the initializer functions to be executed with '
+                         '"first_time" parameter True.'),
+        make_option('-d', '--database',
+                    help='Name of database to sync.')
     )
 
     def handle(self, *args, **options):
@@ -39,17 +48,24 @@ class Command(BaseCommand):
         target_apps = []
         target_apps_check = []
 
-        for app in app_harvester.apps:
-            # Derive app_name from the index which follows the pattern app_name:home
-            if app.package in app_names:
-                target_apps.append(app)
-                target_apps_check.append(app.package)
+        # Execute on all apps loaded
+        if ALL_APPS in app_names:
+            print('YESSS!')
+            target_apps = app_harvester.apps
 
-        # Verify all apps included in target apps
-        for app_name in app_names:
-            if app_name not in target_apps_check:
-                self.stdout.write('{0}WARNING:{1} The app named "{2}" cannot be found. Please make sure it is installed '
-                                  'and try again.'.format(TerminalColors.WARNING, TerminalColors.ENDC, app_name))
+        # Execute only on apps given
+        else:
+            for app in app_harvester.apps:
+                # Derive app_name from the index which follows the pattern app_name:home
+                if app.package in app_names:
+                    target_apps.append(app)
+                    target_apps_check.append(app.package)
+
+            # Verify all apps included in target apps
+            for app_name in app_names:
+                if app_name not in target_apps_check:
+                    self.stdout.write('{0}WARNING:{1} The app named "{2}" cannot be found. Please make sure it is installed '
+                                      'and try again.'.format(TerminalColors.WARNING, TerminalColors.ENDC, app_name))
 
         # Notify user of database provisioning
         self.stdout.write(TerminalColors.BLUE + '\nProvisioning Persistent Stores...' + TerminalColors.ENDC)
@@ -91,7 +107,20 @@ class Command(BaseCommand):
             persistent_stores = app.persistent_stores()
 
             if persistent_stores:
-                for persistent_store in persistent_stores:
+                # Assemble list of target persistent stores
+                target_persistent_stores = []
+
+                # Target the persistent store provided
+                if options['database']:
+                    for persistent_store in persistent_stores:
+                        if options['database'] == persistent_store.name:
+                            target_persistent_stores.append(persistent_store)
+
+                # Target all persistent stores
+                else:
+                    target_persistent_stores = persistent_stores
+
+                for persistent_store in target_persistent_stores:
                     full_db_name = '_'.join((app.package, persistent_store.name))
                     new_database = True
 
@@ -190,7 +219,7 @@ class Command(BaseCommand):
                 #------------------------------------------------------------------------------------------------------#
                 # 4. Run initialization functions for each store here
                 #------------------------------------------------------------------------------------------------------#
-                for persistent_store in persistent_stores:
+                for persistent_store in target_persistent_stores:
                     # Split into module name and function name
                     initializer_mod, initializer_function = persistent_store.initializer.split(':')
 
@@ -210,7 +239,7 @@ class Command(BaseCommand):
 
                     # Get the function
                     initializer = getattr(module, initializer_function)
-                    initializer(new_database)
-
-            # Spacer
-            self.stdout.write('')
+                    if options['first_time']:
+                        initializer(True)
+                    else:
+                        initializer(new_database)

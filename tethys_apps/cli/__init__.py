@@ -164,7 +164,7 @@ def syncstores_command(args):
     if args.refresh:
         valid_inputs = ('y', 'n', 'yes', 'no')
         no_inputs = ('n', 'no')
-        proceed = raw_input('{1}Warning:{2} You have specified the database refresh option. This will drop all of the '
+        proceed = raw_input('{1}WARNING:{2} You have specified the database refresh option. This will drop all of the '
                             'databases for the following apps: {0}. This could result in significant data loss and '
                             'cannot be undone. Do you wish to continue? (y/n): '.format(', '.join(args.app),
                                                                                         TerminalColors.WARNING,
@@ -178,6 +178,12 @@ def syncstores_command(args):
         else:
             print('Operation cancelled by user.')
             exit(0)
+
+    if args.firsttime:
+        process.extend(['-f'])
+
+    if args.database:
+        process.extend(['-d', args.database])
 
     if args.app:
         process.extend(args.app)
@@ -217,15 +223,22 @@ def tethys_command():
 
     # Sync stores command
     syncstores_parser = subparsers.add_parser('syncstores', help='Management command for App Persistent Stores.')
-    syncstores_parser.add_argument('app', help='Name of the app project whose persistent stores will be synced.',
+    syncstores_parser.add_argument('app', help='Name of the target on which to perform persistent store sync OR "all" '
+                                               'to sync all of them.',
                                    nargs='+')
     syncstores_parser.add_argument('-r', '--refresh',
                                    help='When called with this option, the tables will be dropped prior to syncing'
                                         ' resulting in a refreshed database.',
                                    action='store_true',
                                    dest='refresh')
+    syncstores_parser.add_argument('-f', '--firsttime',
+                                   help='Call with this option to force the initializer functions to be executed with '
+                                        '"first_time" parameter True.',
+                                   action='store_true',
+                                   dest='firsttime')
+    syncstores_parser.add_argument('-d', '--database', help='Name of database to sync.')
     syncstores_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
-    syncstores_parser.set_defaults(func=syncstores_command, refresh=False)
+    syncstores_parser.set_defaults(func=syncstores_command, refresh=False, firstime=False)
 
 
     # Parse the args and call the default function
