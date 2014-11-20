@@ -16,7 +16,6 @@ requires = ['django',
 
 version = '0.7.0'
 
-
 setup(
     name='django-tethys_apps',
     version=version,
