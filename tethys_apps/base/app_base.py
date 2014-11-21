@@ -14,12 +14,13 @@ class TethysAppBase(object):
     Base class used to define the app class for Tethys apps.
 
     Attributes:
-      name(string): Name of the app.
-      index(string): Lookup term for the index URL of the app.
-      icon(string): Location of the image to use for the app icon.
-      package(string): Name of the app package.
-      root_url(string): Root URL of the app.
-      color(string): App theme color as RGB hexadecimal.
+      name (string): Name of the app.
+      index (string): Lookup term for the index URL of the app.
+      icon (string): Location of the image to use for the app icon.
+      package (string): Name of the app package.
+      root_url (string): Root URL of the app.
+      color (string): App theme color as RGB hexadecimal.
+
     """
     name = ''
     index = ''
@@ -36,10 +37,29 @@ class TethysAppBase(object):
 
     def url_map(self):
         """
-        Use this method to define the URL Maps for your app.
+        Use this method to define the URL Maps for your app. Your ``UrlMap`` objects must be created from a ``UrlMap`` class that is bound to the ``root_url`` of your app. Use the ``url_map_maker()`` function to create the bound ``UrlMap`` class. If you generate your app project from the scaffold, this will be done automatically.
 
         Returns:
-          iterable: A list or tuple of UrlMap objects.
+          iterable: A list or tuple of ``UrlMap`` objects.
+
+        Example:
+
+        ::
+
+            def url_maps(self):
+                \"""
+                Example url_maps method.
+                \"""
+                # Create UrlMap class that is bound to the root url.
+                UrlMap = url_map_maker(self.root_url)
+
+                url_maps = (UrlMap(name='home',
+                                   url='my-first-app',
+                                   controller='my_first_app.controllers.home'
+                                   ),
+                )
+
+                return url_maps
         """
         raise NotImplementedError()
     
@@ -48,7 +68,24 @@ class TethysAppBase(object):
         Define this method to register persistent store databases for your app. You may define up to 5 persistent stores for an app.
 
         Returns:
-          iterable: A list or tuple of PersistentStore objects. A persistent store database will be created for each object.
+          iterable: A list or tuple of ``PersistentStore`` objects. A persistent store database will be created for each object returned.
+
+        Example:
+
+        ::
+
+            def persistent_stores(self):
+                \"""
+                Example persistent_stores method.
+                \"""
+
+                stores = (PersistentStore(name='example_db',
+                                          initializer='init_stores:init_example_db',
+                                          spatial=True
+                        ),
+                )
+
+                return stores
         """
         return None
 
@@ -57,6 +94,23 @@ class TethysAppBase(object):
         Use this method to define dataset service connections for use in your app.
 
         Returns:
-          iterable: A list or tuple of DatasetService objects.
+          iterable: A list or tuple of ``DatasetService`` objects.
+
+        Example:
+
+        ::
+
+            def dataset_services(self):
+                \"""
+                Example dataset_services method.
+                \"""
+                dataset_services = (DatasetService(name='example',
+                                                   type='ckan',
+                                                   endpoint='http://www.example.com/api/3/action',
+                                                   apikey='a-R3llY-n1Ce-@Pi-keY'
+                                                   ),
+                )
+
+                return dataset_services
         """
         return None

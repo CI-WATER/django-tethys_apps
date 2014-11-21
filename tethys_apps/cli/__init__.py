@@ -204,11 +204,12 @@ def tethys_command():
 
     # Setup scaffold command
     scaffold_parser = subparsers.add_parser('scaffold', help='Create a new Tethys app project from a scaffold.')
-    scaffold_parser.add_argument('name', help='The name of the new Tethys app project to create.')
+    scaffold_parser.add_argument('name', help='The name of the new Tethys app project to create. Only lowercase '
+                                              'letters, numbers, and underscores allowed.')
     scaffold_parser.set_defaults(func=scaffold_command)
 
     # Setup generate command
-    gen_parser = subparsers.add_parser('gen', help='Create aids the setup of Tethys by automating '
+    gen_parser = subparsers.add_parser('gen', help='Aids the installation of Tethys by automating the '
                                                    'creation of supporting files.')
     gen_parser.add_argument('type', help='The type of object to generate.', choices=VALID_GEN_OBJECTS)
     gen_parser.add_argument('-d', '--directory', help='Destination directory for the generated object.')
