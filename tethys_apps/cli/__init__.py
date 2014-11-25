@@ -12,7 +12,8 @@ from tethys_apps.terminal_colors import TerminalColors
 
 # Module level variables
 GEN_SETTINGS_OPTION = 'settings'
-VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION,)
+GEN_APACHE_OPTION = 'apache'
+VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION, GEN_APACHE_OPTION)
 DEFAULT_INSTALLATION_DIRECTORY = '/usr/lib/tethys/src'
 DEVELOPMENT_DIRECTORY = '/usr/lib/tethys/tethys'
 
@@ -90,6 +91,13 @@ def generate_command(args):
         secret_key = ''.join([random.choice(string.ascii_letters + string.digits) for n in xrange(50)])
         context.update({'secret_key': secret_key})
         print('Generating new settings.py file...')
+
+    if args.type == GEN_APACHE_OPTION:
+        # Destination filename
+        destination_file = 'tethys-default.conf'
+
+        # Parse template
+        template = Template(open(template_path).read())
 
     # Default destination path is the current working directory
     destination_dir = os.getcwd()

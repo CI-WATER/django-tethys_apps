@@ -50,7 +50,6 @@ class Command(BaseCommand):
 
         # Execute on all apps loaded
         if ALL_APPS in app_names:
-            print('YESSS!')
             target_apps = app_harvester.apps
 
         # Execute only on apps given

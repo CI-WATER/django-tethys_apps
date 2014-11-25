@@ -14,7 +14,7 @@ requires = ['django',
             'django-tethys_gizmos',
             'django-tethys_datasets']
 
-version = '0.7.3'
+version = '0.7.5'
 
 setup(
     name='django-tethys_apps',
@@ -24,7 +24,7 @@ setup(
     license='BSD 2-Clause License',
     description='An app to enable development and hosting capabilities for Tethys Apps.',
     long_description=README,
-    url='',
+    url='http://tethys-platform.readthedocs.org/',
     author='Nathan Swain',
     author_email='nathan.swain@byu.net',
     classifiers=[
