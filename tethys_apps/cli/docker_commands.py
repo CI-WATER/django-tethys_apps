@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import json
+from exceptions import OSError
 from functools import cmp_to_key
 from docker.utils import kwargs_from_env, compare_version
 from docker.client import Client as DockerClient, DEFAULT_DOCKER_API_VERSION as MAX_CLIENT_DOCKER_API_VERSION
@@ -13,7 +14,7 @@ __all__ = ['docker_init', 'docker_start',
            'docker_update', 'docker_remove',
            'docker_ip']
 
-MINIMUM_API_VERSION = '1.14'
+MINIMUM_API_VERSION = '1.12'
 
 OSX = 1
 WINDOWS = 2
@@ -104,8 +105,16 @@ def get_docker_client():
         # Create Real Docker client
         return DockerClient(**client_kwargs)
 
+    # For Linux
+    except OSError:
+        # Find the right version of the API by creating a DockerClient with the minimum working version
+        # Then test to see if the Docker is running a later version than the minimum
+        # See: https://github.com/docker/docker-py/issues/439
+        version_client = DockerClient(base_url='unix://var/run/docker.sock', version=MINIMUM_API_VERSION)
+        version = get_api_version(MAX_CLIENT_DOCKER_API_VERSION, version_client.version()['ApiVersion'])
+        return DockerClient(base_url='unix://var/run/docker.sock', version=version)
+
     except:
-        print("TODO: NEED TO HANDLE LINUX AND WINDOWS CASES in docker_commands.py get_docker_client()")
         raise
 
 
