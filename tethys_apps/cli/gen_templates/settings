@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'tethys_apps',
     'tethys_gizmos',
     'tethys_datasets',
+    'tethys_wps',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -158,4 +159,19 @@ TETHYS_APPS_SUPERUSER_URL = 'postgresql://tethys_super:pass@localhost:5432/tethy
 
 # Tethys Gizmos Settings
 TETHYS_GIZMOS_GOOGLE_MAPS_API_KEY = ''
+
+# Dataset Services Settings
+# TETHYS_DATASET_SERVICES = {
+#     'default': {
+#         'ENGINE': 'tethys_datasets.engines.CkanDatasetEngine',
+#         'ENDPOINT': 'http://www.example.com/api/3/action',
+#         'APIKEY': 'a-R3llY-n1Ce-@Pi-keY'
+#     },
+#     'example': {
+#         'ENGINE': 'tethys_datasets.engines.HydroServerDatasetEngine',
+#         'ENDPOINT': 'http://www.demo.com/api',
+#         'USERNAME': 'user',
+#         'PASSWORD': 'password'
+#     }
+# }
 

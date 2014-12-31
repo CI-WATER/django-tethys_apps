@@ -114,3 +114,26 @@ class TethysAppBase(object):
                 return dataset_services
         """
         return None
+
+    def wps_services(self):
+        """
+        Use this method to define web processing service connections for use in your app.
+
+        Returns:
+          iterable: A list or tuple of ``WpsService`` objects.
+
+        Example:
+
+        ::
+
+            def wps_services(self):
+                \"""
+                Example wps_services method.
+                \"""
+                wps_services = (WpsService(name='example',
+                                           endpoint='http://www.example.com/wps/WebProcessingService'
+                                           ),
+
+                return wps_services
+        """
+        return None

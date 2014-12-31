@@ -12,9 +12,11 @@ requires = ['django',
             'sqlalchemy',
             'psycopg2',
             'django-tethys_gizmos',
-            'django-tethys_datasets']
+            'django-tethys_datasets',
+            'django-tethys_wps',
+            'docker-py']
 
-version = '0.7.5'
+version = '0.8.0'
 
 setup(
     name='django-tethys_apps',

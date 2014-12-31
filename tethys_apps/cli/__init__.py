@@ -9,6 +9,7 @@ from django.template import Template, Context
 from django.conf import settings
 
 from tethys_apps.terminal_colors import TerminalColors
+from .docker_commands import *
 
 # Module level variables
 GEN_SETTINGS_OPTION = 'settings'
@@ -158,6 +159,30 @@ def manage_command(args):
             pass
 
 
+def docker_command(args):
+    """
+    Docker management commands.
+    """
+    if args.command == 'init':
+        docker_init()
+
+    elif args.command == 'start':
+        docker_start()
+
+    elif args.command == 'stop':
+        docker_stop()
+
+    elif args.command == 'refresh':
+        docker_refresh()
+
+    elif args.command == 'status':
+        docker_status()
+
+    elif args.command == 'update':
+        docker_update()
+
+
+
 def syncstores_command(args):
     """
     Sync persistent stores.
@@ -248,6 +273,11 @@ def tethys_command():
     syncstores_parser.add_argument('-d', '--database', help='Name of database to sync.')
     syncstores_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
     syncstores_parser.set_defaults(func=syncstores_command, refresh=False, firstime=False)
+
+    # Setup the docker commands
+    docker_parser = subparsers.add_parser('docker', help="Management commands for the Tethys Docker containers.")
+    docker_parser.add_argument('command', help='Docker command to run.', choices=['init', 'refresh', 'start', 'stop', 'status', 'update'])
+    docker_parser.set_defaults(func=docker_command)
 
 
     # Parse the args and call the default function
