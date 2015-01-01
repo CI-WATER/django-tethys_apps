@@ -8,7 +8,7 @@ from functools import cmp_to_key
 from docker.utils import kwargs_from_env, compare_version
 from docker.client import Client as DockerClient, DEFAULT_DOCKER_API_VERSION as MAX_CLIENT_DOCKER_API_VERSION
 
-__all__ = ['docker_init', 'docker_start', 'docker_stop', 'docker_refresh', 'docker_status', 'docker_update']
+__all__ = ['docker_init', 'docker_start', 'docker_stop', 'docker_status', 'docker_update', 'docker_remove']
 
 MINIMUM_API_VERSION = '1.14'
 
@@ -200,26 +200,10 @@ def log_pull_stream(stream):
     print()
 
 
-def docker_init():
+def install_docker_containers(docker_client):
     """
-    Pull Docker images for Tethys Platform and Run for the first time, prompting for various input parameters.
+    Install all Docker containers
     """
-    # Retrieve a Docker client
-    docker_client = get_docker_client()
-
-    # Check for the correct images
-    images_to_install = get_images_to_install(docker_client)
-
-    if len(images_to_install) < 1:
-        print("Docker images already pulled.")
-    else:
-        print("Pulling Docker images...")
-
-    # Pull the Docker images
-    for image in images_to_install:
-        pull_stream = docker_client.pull(image, stream=True)
-        log_pull_stream(pull_stream)
-
     # Check for containers that need to be created
     containers_to_create = get_containers_to_create(docker_client)
 
@@ -266,23 +250,149 @@ def docker_init():
                                                                     'FAX': '',
                                                                     'USERNAME': 'wps',
                                                                     'PASSWORD': 'wps'
-                                                                    }
+                                                       }
         )
 
     else:
         print("52 North WPS Docker container already installed: skipping.")
+    print("The Docker containers have been successfully installed.")
+
+
+def container_check(docker_client):
+    """
+    Check to ensure containers are installed.
+    """
+    # Perform this check to make sure the "tethys docker init" command has been run
+    containers_needing_to_be_installed = get_containers_to_create(docker_client)
+
+    if len(containers_needing_to_be_installed) > 0:
+        print('The following Docker containers have not been installed: {0}'.format(
+            ', '.join(containers_needing_to_be_installed)))
+        print('Run the "tethys docker init" command to install them.')
+        exit(1)
+
+
+def start_docker_containers(docker_client):
+    """
+    Start all Docker containers
+    """
+    # Perform check
+    container_check(docker_client)
+
+    # Start PostGIS
+    print('Starting PostGIS...')
+    docker_client.start(container=POSTGIS_CONTAINER,
+                        port_bindings={5432: 5432})
+
+    # Start GeoServer
+    print('Starting GeoServer...')
+    docker_client.start(container=GEOSERVER_CONTAINER,
+                        port_bindings={8080: 8080})
+
+    # Start 52 North WPS
+    print('Starting 52 North WPS...')
+    docker_client.start(container=N52WPS_CONTAINER,
+                        port_bindings={8080: 8888})
+
+
+def stop_docker_containers(docker_client):
+    """
+    Stop all Docker containers
+    """
+    # Perform check
+    container_check(docker_client)
+
+    # Stop PostGIS
+    print('Stopping PostGIS...')
+    docker_client.stop(container=POSTGIS_CONTAINER)
+
+    # Stop GeoServer
+    print('Stopping GeoServer...')
+    docker_client.stop(container=GEOSERVER_CONTAINER)
+
+    # Stop 52 North WPS
+    print('Stopping 52 North WPS...')
+    docker_client.stop(container=N52WPS_CONTAINER)
+
+
+def remove_docker_containers(docker_client):
+    """
+    Remove all docker containers
+    """
+    # Perform check
+    container_check(docker_client)
+
+    # Remove PostGIS
+    print('Removing PostGIS...')
+    docker_client.remove_container(container=POSTGIS_CONTAINER)
+
+    # Remove GeoServer
+    print('Removing GeoServer...')
+    docker_client.remove_container(container=GEOSERVER_CONTAINER)
+
+    # Remove 52 North WPS
+    print('Removing 52 North WPS...')
+    docker_client.remove_container(container=N52WPS_CONTAINER)
+
+
+def docker_init():
+    """
+    Pull Docker images for Tethys Platform and create containers with interactive input.
+    """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Check for the correct images
+    images_to_install = get_images_to_install(docker_client)
+
+    if len(images_to_install) < 1:
+        print("Docker images already pulled.")
+    else:
+        print("Pulling Docker images...")
+
+    # Pull the Docker images
+    for image in images_to_install:
+        pull_stream = docker_client.pull(image, stream=True)
+        log_pull_stream(pull_stream)
+
+    # Install docker containers
+    install_docker_containers(docker_client)
 
 
 def docker_start():
-    print('start')
+    """
+    Start the docker containers
+    """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Start the Docker containers
+    start_docker_containers(docker_client)
 
 
 def docker_stop():
-    print('stop')
+    """
+    Stop Docker containers
+    """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Stop the Docker containers
+    stop_docker_containers(docker_client)
 
 
-def docker_refresh():
-    print('refresh')
+def docker_remove():
+    """
+    Remove Docker containers.
+    """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Stop the Docker containers
+    stop_docker_containers(docker_client)
+
+    # Remove Docker containers
+    remove_docker_containers(docker_client)
 
 
 def docker_status():
@@ -290,6 +400,20 @@ def docker_status():
 
 
 def docker_update():
+    """
+    Remove Docker containers and pull the latest images updates.
+    """
+    # Retrieve a Docker client
+
+    # Pull all the images again to get latest version (without check)
+
+    # Reinstall containers
     print('update')
+
+
+def docker_ips():
+    """
+    Returns the hosts and ports of the Docker containers.
+    """
 
 

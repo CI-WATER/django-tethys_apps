@@ -172,14 +172,14 @@ def docker_command(args):
     elif args.command == 'stop':
         docker_stop()
 
-    elif args.command == 'refresh':
-        docker_refresh()
-
     elif args.command == 'status':
         docker_status()
 
     elif args.command == 'update':
         docker_update()
+
+    elif args.command == 'remove':
+        docker_remove()
 
 
 
@@ -276,7 +276,8 @@ def tethys_command():
 
     # Setup the docker commands
     docker_parser = subparsers.add_parser('docker', help="Management commands for the Tethys Docker containers.")
-    docker_parser.add_argument('command', help='Docker command to run.', choices=['init', 'refresh', 'start', 'stop', 'status', 'update'])
+    docker_parser.add_argument('command', help='Docker command to run.', choices=['init', 'start', 'stop',
+                                                                                  'status', 'update', 'remove'])
     docker_parser.set_defaults(func=docker_command)
 
 
