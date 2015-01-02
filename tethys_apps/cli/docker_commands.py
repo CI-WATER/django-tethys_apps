@@ -8,7 +8,10 @@ from functools import cmp_to_key
 from docker.utils import kwargs_from_env, compare_version
 from docker.client import Client as DockerClient, DEFAULT_DOCKER_API_VERSION as MAX_CLIENT_DOCKER_API_VERSION
 
-__all__ = ['docker_init', 'docker_start', 'docker_stop', 'docker_status', 'docker_update', 'docker_remove']
+__all__ = ['docker_init', 'docker_start',
+           'docker_stop', 'docker_status',
+           'docker_update', 'docker_remove',
+           'docker_ip']
 
 MINIMUM_API_VERSION = '1.14'
 
@@ -200,7 +203,47 @@ def log_pull_stream(stream):
     print()
 
 
-def install_docker_containers(docker_client):
+def get_docker_container_dicts(docker_client):
+    # Check status of containers
+    containers = docker_client.containers(all=True)
+    container_dicts = dict()
+
+    for container in containers:
+
+        if '/' + POSTGIS_CONTAINER in container['Names']:
+            container_dicts[POSTGIS_CONTAINER] = container
+
+        elif '/' + GEOSERVER_CONTAINER in container['Names']:
+            container_dicts[GEOSERVER_CONTAINER] = container
+
+        elif '/' + N52WPS_CONTAINER in container['Names']:
+            container_dicts[N52WPS_CONTAINER] = container
+
+    return container_dicts
+
+
+def get_docker_container_status(docker_client):
+    # Check status of containers
+    containers = docker_client.containers()
+    container_status = {POSTGIS_CONTAINER: False,
+                        GEOSERVER_CONTAINER: False,
+                        N52WPS_CONTAINER: False}
+
+    for container in containers:
+
+        if '/' + POSTGIS_CONTAINER in container['Names']:
+            container_status[POSTGIS_CONTAINER] = True
+
+        elif '/' + GEOSERVER_CONTAINER in container['Names']:
+            container_status[GEOSERVER_CONTAINER] = True
+
+        elif '/' + N52WPS_CONTAINER in container['Names']:
+            container_status[N52WPS_CONTAINER] = True
+
+    return container_status
+
+
+def install_docker_containers(docker_client, force=False):
     """
     Install all Docker containers
     """
@@ -208,7 +251,7 @@ def install_docker_containers(docker_client):
     containers_to_create = get_containers_to_create(docker_client)
 
     # PostGIS
-    if POSTGIS_CONTAINER in containers_to_create:
+    if POSTGIS_CONTAINER in containers_to_create or force:
         print("Installing the PostGIS Docker container...")
 
         postgis_container = docker_client.create_container(name=POSTGIS_CONTAINER,
@@ -222,7 +265,7 @@ def install_docker_containers(docker_client):
         print("PostGIS Docker container already installed: skipping.")
 
     # GeoServer
-    if GEOSERVER_CONTAINER in containers_to_create:
+    if GEOSERVER_CONTAINER in containers_to_create or force:
         print("Installing the GeoServer Docker container...")
 
         geoserver_container = docker_client.create_container(name=GEOSERVER_CONTAINER,
@@ -233,7 +276,7 @@ def install_docker_containers(docker_client):
         print("GeoServer Docker container already installed: skipping.")
 
     # 52 North WPS
-    if N52WPS_CONTAINER in containers_to_create:
+    if N52WPS_CONTAINER in containers_to_create or force:
         print("Installing the 52 North WPS Docker container...")
 
         wps_container = docker_client.create_container(name=N52WPS_CONTAINER,
@@ -249,12 +292,12 @@ def install_docker_containers(docker_client):
                                                                     'PHONE': '',
                                                                     'FAX': '',
                                                                     'USERNAME': 'wps',
-                                                                    'PASSWORD': 'wps'
-                                                       }
+                                                                    'PASSWORD': 'wps'}
         )
 
     else:
         print("52 North WPS Docker container already installed: skipping.")
+
     print("The Docker containers have been successfully installed.")
 
 
@@ -279,40 +322,73 @@ def start_docker_containers(docker_client):
     # Perform check
     container_check(docker_client)
 
+    # Get container dicts
+    container_status = get_docker_container_status(docker_client)
+
     # Start PostGIS
-    print('Starting PostGIS...')
-    docker_client.start(container=POSTGIS_CONTAINER,
-                        port_bindings={5432: 5432})
+    if not container_status[POSTGIS_CONTAINER]:
+        print('Starting PostGIS container...')
+        docker_client.start(container=POSTGIS_CONTAINER,
+                            port_bindings={5432: 5432})
+    else:
+        print('PostGIS container already running...')
 
-    # Start GeoServer
-    print('Starting GeoServer...')
-    docker_client.start(container=GEOSERVER_CONTAINER,
-                        port_bindings={8080: 8080})
+    if not container_status[GEOSERVER_CONTAINER]:
+        # Start GeoServer
+        print('Starting GeoServer container...')
+        docker_client.start(container=GEOSERVER_CONTAINER,
+                            port_bindings={8080: 8080})
+    else:
+        print('GeoServer container already running...')
 
-    # Start 52 North WPS
-    print('Starting 52 North WPS...')
-    docker_client.start(container=N52WPS_CONTAINER,
-                        port_bindings={8080: 8888})
+    if not container_status[N52WPS_CONTAINER]:
+        # Start 52 North WPS
+        print('Starting 52 North WPS container...')
+        docker_client.start(container=N52WPS_CONTAINER,
+                            port_bindings={8080: 8888})
+    else:
+        print('52 North WPS container already running...')
 
 
-def stop_docker_containers(docker_client):
+def stop_docker_containers(docker_client, silent=False):
     """
     Stop all Docker containers
     """
     # Perform check
     container_check(docker_client)
 
+    # Get container dicts
+    container_status = get_docker_container_status(docker_client)
+
     # Stop PostGIS
-    print('Stopping PostGIS...')
-    docker_client.stop(container=POSTGIS_CONTAINER)
+    if container_status[POSTGIS_CONTAINER]:
+        if not silent:
+            print('Stopping PostGIS container...')
+
+        docker_client.stop(container=POSTGIS_CONTAINER)
+
+    elif not silent:
+        print('PostGIS container already stopped.')
 
     # Stop GeoServer
-    print('Stopping GeoServer...')
-    docker_client.stop(container=GEOSERVER_CONTAINER)
+    if container_status[GEOSERVER_CONTAINER]:
+        if not silent:
+            print('Stopping GeoServer container...')
+
+        docker_client.stop(container=GEOSERVER_CONTAINER)
+
+    elif not silent:
+        print('GeoServer container already stopped.')
 
     # Stop 52 North WPS
-    print('Stopping 52 North WPS...')
-    docker_client.stop(container=N52WPS_CONTAINER)
+    if container_status[N52WPS_CONTAINER]:
+        if not silent:
+            print('Stopping 52 North WPS container...')
+
+        docker_client.stop(container=N52WPS_CONTAINER)
+
+    elif not silent:
+        print('52 North WPS container already stopped.')
 
 
 def remove_docker_containers(docker_client):
@@ -396,7 +472,32 @@ def docker_remove():
 
 
 def docker_status():
-    print('status')
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Perform check
+    container_check(docker_client)
+
+    # Get container dicts
+    container_status = get_docker_container_status(docker_client)
+
+    # PostGIS
+    if container_status[POSTGIS_CONTAINER]:
+        print('PostGIS: Running')
+    else:
+        print('PostGIS: Stopped')
+
+    # GeoServer
+    if container_status[GEOSERVER_CONTAINER]:
+        print('GeoServer: Running')
+    else:
+        print('GeoServer: Stopped')
+
+    # 52 North WPS
+    if container_status[N52WPS_CONTAINER]:
+        print('52 North WPS: Running')
+    else:
+        print('52 North WPS: Stopped')
 
 
 def docker_update():
@@ -404,16 +505,57 @@ def docker_update():
     Remove Docker containers and pull the latest images updates.
     """
     # Retrieve a Docker client
+    docker_client = get_docker_client()
 
-    # Pull all the images again to get latest version (without check)
+    # Stop containers
+    stop_docker_containers(docker_client)
+
+    # Remove containers
+    remove_docker_containers(docker_client)
+
+    # Force pull all the images without check to get latest version
+    for image in REQUIRED_DOCKER_IMAGES:
+        pull_stream = docker_client.pull(image, stream=True)
+        log_pull_stream(pull_stream)
 
     # Reinstall containers
-    print('update')
+    install_docker_containers(docker_client, force=True)
 
 
-def docker_ips():
+def docker_ip():
     """
     Returns the hosts and ports of the Docker containers.
     """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
 
+    # Containers
+    containers = get_docker_container_dicts(docker_client)
+    container_status = get_docker_container_status(docker_client)
 
+    # PostGIS
+    if container_status[POSTGIS_CONTAINER]:
+        postgis_container = containers[POSTGIS_CONTAINER]
+        postgis_port = postgis_container['Ports'][0]['PublicPort']
+        print('PostGIS: {0}'.format(postgis_port))
+
+    else:
+        print('PostGIS container not running.')
+
+    # GeoServer
+    if container_status[GEOSERVER_CONTAINER]:
+        geoserver_container = containers[GEOSERVER_CONTAINER]
+        geoserver_port = geoserver_container['Ports'][0]['PublicPort']
+        print('GeoServer: {0}'.format(geoserver_port))
+
+    else:
+        print('GeoServer container not running.')
+
+    # 52 North WPS
+    if container_status[N52WPS_CONTAINER]:
+        n52wps_container = containers[N52WPS_CONTAINER]
+        n52wps_port = n52wps_container['Ports'][0]['PublicPort']
+        print('52 North WPS: {0}'.format(n52wps_port))
+
+    else:
+        print('52 North WPS container not running.')

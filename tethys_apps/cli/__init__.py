@@ -181,6 +181,8 @@ def docker_command(args):
     elif args.command == 'remove':
         docker_remove()
 
+    elif args.command == 'ip':
+        docker_ip()
 
 
 def syncstores_command(args):
@@ -277,7 +279,8 @@ def tethys_command():
     # Setup the docker commands
     docker_parser = subparsers.add_parser('docker', help="Management commands for the Tethys Docker containers.")
     docker_parser.add_argument('command', help='Docker command to run.', choices=['init', 'start', 'stop',
-                                                                                  'status', 'update', 'remove'])
+                                                                                  'status', 'update', 'remove',
+                                                                                  'ip'])
     docker_parser.set_defaults(func=docker_command)
 
 
