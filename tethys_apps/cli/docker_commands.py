@@ -4,6 +4,7 @@ import os
 import sys
 import time
 import json
+import getpass
 from exceptions import OSError
 from functools import cmp_to_key
 from docker.utils import kwargs_from_env, compare_version
@@ -252,7 +253,7 @@ def get_docker_container_status(docker_client):
     return container_status
 
 
-def install_docker_containers(docker_client, force=False):
+def install_docker_containers(docker_client, force=False, container=None, defaults=False):
     """
     Install all Docker containers
     """
@@ -263,11 +264,66 @@ def install_docker_containers(docker_client, force=False):
     if POSTGIS_CONTAINER in containers_to_create or force:
         print("Installing the PostGIS Docker container...")
 
+        # Default environmental vars
+        tethys_default_pass = 'pass'
+        tethys_db_manager_pass = 'pass'
+        tethys_super_pass = 'pass'
+
+        # User environmental variables
+        if not defaults:
+            print("Provide passwords for the three Tethys database users or press enter to accept the default "
+                  "passwords shown in square brackets:")
+
+            # tethys_default
+            tethys_default_pass_1 = getpass.getpass('Password for "tethys_default" database user [pass]: ')
+
+            if tethys_default_pass_1 != '':
+                tethys_default_pass_2 = getpass.getpass('Confirm password for "tethys_default" database user: ')
+
+                while tethys_default_pass_1 != tethys_default_pass_2:
+                    print('Passwords do not match, please try again: ')
+                    tethys_default_pass_1 = getpass.getpass('Password for "tethys_default" database user [pass]: ')
+                    tethys_default_pass_2 = getpass.getpass('Confirm password for "tethys_default" database user: ')
+
+                tethys_default_pass = tethys_default_pass_1
+            else:
+                tethys_default_pass = 'pass'
+
+            # tethys_db_manager
+            tethys_db_manager_pass_1 = getpass.getpass('Password for "tethys_db_manager" database user [pass]: ')
+
+            if tethys_db_manager_pass_1 != '':
+                tethys_db_manager_pass_2 = getpass.getpass('Confirm password for "tethys_db_manager" database user: ')
+
+                while tethys_db_manager_pass_1 != tethys_db_manager_pass_2:
+                    print('Passwords do not match, please try again: ')
+                    tethys_db_manager_pass_1 = getpass.getpass('Password for "tethys_db_manager" database user [pass]: ')
+                    tethys_db_manager_pass_2 = getpass.getpass('Confirm password for "tethys_db_manager" database user: ')
+
+                tethys_db_manager_pass = tethys_db_manager_pass_1
+            else:
+                tethys_db_manager_pass = 'pass'
+
+            # tethys_super
+            tethys_super_pass_1 = getpass.getpass('Password for "tethys_super" database user [pass]: ')
+
+            if tethys_super_pass_1 != '':
+                tethys_super_pass_2 = getpass.getpass('Confirm password for "tethys_super" database user: ')
+
+                while tethys_super_pass_1 != tethys_super_pass_2:
+                    print('Passwords do not match, please try again: ')
+                    tethys_super_pass_1 = getpass.getpass('Password for "tethys_super" database user [pass]: ')
+                    tethys_super_pass_2 = getpass.getpass('Confirm password for "tethys_super" database user: ')
+
+                tethys_super_pass = tethys_super_pass_1
+            else:
+                tethys_super_pass = 'pass'
+
         postgis_container = docker_client.create_container(name=POSTGIS_CONTAINER,
                                                            image=POSTGIS_IMAGE,
-                                                           environment={'TETHYS_DEFAULT_PASS': 'pass',
-                                                                        'TETHYS_DB_MANAGER_PASS': 'pass',
-                                                                        'TETHYS_SUPER_PASS': 'pass'}
+                                                           environment={'TETHYS_DEFAULT_PASS': tethys_default_pass,
+                                                                        'TETHYS_DB_MANAGER_PASS': tethys_db_manager_pass,
+                                                                        'TETHYS_SUPER_PASS': tethys_super_pass}
         )
 
     else:
@@ -288,20 +344,101 @@ def install_docker_containers(docker_client, force=False):
     if N52WPS_CONTAINER in containers_to_create or force:
         print("Installing the 52 North WPS Docker container...")
 
+        # Default environmental vars
+        name = 'NONE'
+        position = 'NONE'
+        address = 'NONE'
+        city = 'NONE'
+        state = 'NONE'
+        country = 'NONE'
+        postal_code = 'NONE'
+        email = 'NONE'
+        phone = 'NONE'
+        fax = 'NONE'
+        username = 'wps'
+        password = 'wps'
+
+        if not defaults:
+            print("Provide contact information for the 52 North Web Processing Service or press enter to accept the "
+                  "defaults shown in square brackets: ")
+
+            name = raw_input('Name [NONE]: ')
+            if name == '':
+                name = 'NONE'
+
+            position = raw_input('Position [NONE]: ')
+            if position == '':
+                position = 'NONE'
+
+            address = raw_input('Address [NONE]: ')
+            if address == '':
+                address = 'NONE'
+
+            city = raw_input('City [NONE]: ')
+            if city == '':
+                city = 'NONE'
+
+            state = raw_input('State [NONE]: ')
+            if state == '':
+                state = 'NONE'
+
+            country = raw_input('Country [NONE]: ')
+            if country == '':
+                country = 'NONE'
+
+            postal_code = raw_input('Postal Code [NONE]: ')
+            if postal_code == '':
+                postal_code = 'NONE'
+
+            email = raw_input('Email [NONE]: ')
+            if email == '':
+                email = 'NONE'
+
+            phone = raw_input('Phone [NONE]: ')
+            if phone == '':
+                phone = 'NONE'
+
+            fax = raw_input('Fax [NONE]: ')
+            if fax == '':
+                fax = 'NONE'
+
+            username = raw_input('Admin Username [wps]: ')
+
+            if username == '':
+                username = 'wps'
+
+            password_1 = getpass.getpass('Admin Password [wps]: ')
+
+            if password_1 == '':
+                password = 'wps'
+
+            else:
+                password_2 = getpass.getpass('Confirm Password: ')
+
+                while password_1 != password_2:
+                    print('Passwords do not match, please try again.')
+                    password_1 = getpass.getpass('Admin Password [wps]: ')
+                    password_2 = getpass.getpass('Confirm Password: ')
+
+                password = password_1
+
+
+
+
         wps_container = docker_client.create_container(name=N52WPS_CONTAINER,
                                                        image=N52WPS_IMAGE,
-                                                       environment={'NAME': '',
-                                                                    'POSITION': '',
-                                                                    'ADDRESS': '',
-                                                                    'CITY': '',
-                                                                    'STATE': '',
-                                                                    'COUNTRY': '',
-                                                                    'POSTAL_CODE': '',
-                                                                    'EMAIL': '',
-                                                                    'PHONE': '',
-                                                                    'FAX': '',
-                                                                    'USERNAME': 'wps',
-                                                                    'PASSWORD': 'wps'}
+                                                       environment={'NAME': name,
+                                                                    'POSITION': position,
+                                                                    'ADDRESS': address,
+                                                                    'CITY': city,
+                                                                    'STATE': state,
+                                                                    'COUNTRY': country,
+                                                                    'POSTAL_CODE': postal_code,
+                                                                    'EMAIL': email,
+                                                                    'PHONE': phone,
+                                                                    'FAX': fax,
+                                                                    'USERNAME': username,
+                                                                    'PASSWORD': password}
         )
 
     else:
@@ -420,7 +557,7 @@ def remove_docker_containers(docker_client):
     docker_client.remove_container(container=N52WPS_CONTAINER)
 
 
-def docker_init():
+def docker_init(container=None, defaults=False):
     """
     Pull Docker images for Tethys Platform and create containers with interactive input.
     """
@@ -441,10 +578,10 @@ def docker_init():
         log_pull_stream(pull_stream)
 
     # Install docker containers
-    install_docker_containers(docker_client)
+    install_docker_containers(docker_client, container, defaults)
 
 
-def docker_start():
+def docker_start(container=None, defaults=False):
     """
     Start the docker containers
     """
@@ -455,7 +592,7 @@ def docker_start():
     start_docker_containers(docker_client)
 
 
-def docker_stop():
+def docker_stop(container=None, defaults=False):
     """
     Stop Docker containers
     """
@@ -466,7 +603,7 @@ def docker_stop():
     stop_docker_containers(docker_client)
 
 
-def docker_remove():
+def docker_remove(container=None, defaults=False):
     """
     Remove Docker containers.
     """
@@ -480,7 +617,10 @@ def docker_remove():
     remove_docker_containers(docker_client)
 
 
-def docker_status():
+def docker_status(container=None, defaults=False):
+    """
+    Returns the status of the Docker containers: either Running or Stopped.
+    """
     # Retrieve a Docker client
     docker_client = get_docker_client()
 
@@ -509,7 +649,7 @@ def docker_status():
         print('52 North WPS: Stopped')
 
 
-def docker_update():
+def docker_update(container=None, defaults=False):
     """
     Remove Docker containers and pull the latest images updates.
     """
@@ -531,7 +671,7 @@ def docker_update():
     install_docker_containers(docker_client, force=True)
 
 
-def docker_ip():
+def docker_ip(container=None, defaults=False):
     """
     Returns the hosts and ports of the Docker containers.
     """
