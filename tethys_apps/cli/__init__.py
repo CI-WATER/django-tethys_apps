@@ -163,26 +163,28 @@ def docker_command(args):
     """
     Docker management commands.
     """
+    print(args)
+
     if args.command == 'init':
-        docker_init()
+        docker_init(container=args.container, defaults=args.defaults)
 
     elif args.command == 'start':
-        docker_start()
+        docker_start(container=args.container)
 
     elif args.command == 'stop':
-        docker_stop()
+        docker_stop(container=args.container)
 
     elif args.command == 'status':
-        docker_status()
+        docker_status(container=args.container)
 
     elif args.command == 'update':
-        docker_update()
+        docker_update(container=args.container, defaults=args.defaults)
 
     elif args.command == 'remove':
-        docker_remove()
+        docker_remove(container=args.container)
 
     elif args.command == 'ip':
-        docker_ip()
+        docker_ip(container=args.container)
 
 
 def syncstores_command(args):
@@ -278,11 +280,17 @@ def tethys_command():
 
     # Setup the docker commands
     docker_parser = subparsers.add_parser('docker', help="Management commands for the Tethys Docker containers.")
-    docker_parser.add_argument('command', help='Docker command to run.', choices=['init', 'start', 'stop',
-                                                                                  'status', 'update', 'remove',
-                                                                                  'ip'])
+    docker_parser.add_argument('command',
+                               help='Docker command to run.',
+                               choices=['init', 'start', 'stop', 'status', 'update', 'remove', 'ip'])
+    docker_parser.add_argument('-d', '--defaults',
+                               action='store_true',
+                               dest='defaults',
+                               help="Run command without prompting without interactive input, using defaults instead.")
+    docker_parser.add_argument('-c', '--container',
+                               help="Execute the command only on the given container.",
+                               choices=['postgis', 'wps', 'geoserver'])
     docker_parser.set_defaults(func=docker_command)
-
 
     # Parse the args and call the default function
     args = parser.parse_args()

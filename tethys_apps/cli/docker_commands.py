@@ -1,8 +1,7 @@
 import subprocess
-from subprocess import Popen, PIPE
+from subprocess import PIPE
 import os
 import sys
-import time
 import json
 import getpass
 from exceptions import OSError
@@ -578,10 +577,10 @@ def docker_init(container=None, defaults=False):
         log_pull_stream(pull_stream)
 
     # Install docker containers
-    install_docker_containers(docker_client, container, defaults)
+    install_docker_containers(docker_client, container=container, defaults=defaults)
 
 
-def docker_start(container=None, defaults=False):
+def docker_start(container=None):
     """
     Start the docker containers
     """
@@ -592,7 +591,7 @@ def docker_start(container=None, defaults=False):
     start_docker_containers(docker_client)
 
 
-def docker_stop(container=None, defaults=False):
+def docker_stop(container=None):
     """
     Stop Docker containers
     """
@@ -603,7 +602,7 @@ def docker_stop(container=None, defaults=False):
     stop_docker_containers(docker_client)
 
 
-def docker_remove(container=None, defaults=False):
+def docker_remove(container=None):
     """
     Remove Docker containers.
     """
@@ -617,7 +616,7 @@ def docker_remove(container=None, defaults=False):
     remove_docker_containers(docker_client)
 
 
-def docker_status(container=None, defaults=False):
+def docker_status(container=None):
     """
     Returns the status of the Docker containers: either Running or Stopped.
     """
@@ -671,7 +670,7 @@ def docker_update(container=None, defaults=False):
     install_docker_containers(docker_client, force=True)
 
 
-def docker_ip(container=None, defaults=False):
+def docker_ip(container=None):
     """
     Returns the hosts and ports of the Docker containers.
     """
