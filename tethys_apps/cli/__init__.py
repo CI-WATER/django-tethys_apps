@@ -163,8 +163,6 @@ def docker_command(args):
     """
     Docker management commands.
     """
-    print(args)
-
     if args.command == 'init':
         docker_init(container=args.container, defaults=args.defaults)
 
@@ -175,7 +173,7 @@ def docker_command(args):
         docker_stop(container=args.container)
 
     elif args.command == 'status':
-        docker_status(container=args.container)
+        docker_status()
 
     elif args.command == 'update':
         docker_update(container=args.container, defaults=args.defaults)
@@ -184,7 +182,7 @@ def docker_command(args):
         docker_remove(container=args.container)
 
     elif args.command == 'ip':
-        docker_ip(container=args.container)
+        docker_ip()
 
 
 def syncstores_command(args):
@@ -289,7 +287,7 @@ def tethys_command():
                                help="Run command without prompting without interactive input, using defaults instead.")
     docker_parser.add_argument('-c', '--container',
                                help="Execute the command only on the given container.",
-                               choices=['postgis', 'wps', 'geoserver'])
+                               choices=[POSTGIS_INPUT, GEOSERVER_INPUT, N52WPS_INPUT])
     docker_parser.set_defaults(func=docker_command)
 
     # Parse the args and call the default function
