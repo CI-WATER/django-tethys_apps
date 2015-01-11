@@ -4,6 +4,7 @@ import os
 import sys
 import json
 import getpass
+import inspect, pprint
 from exceptions import OSError
 from functools import cmp_to_key
 from docker.utils import kwargs_from_env, compare_version
@@ -36,9 +37,15 @@ POSTGIS_INPUT = 'postgis'
 GEOSERVER_INPUT = 'geoserver'
 N52WPS_INPUT = 'wps'
 
+DEFAULT_POSTGIS_PORT = '5435'
+DEFAULT_GEOSERVER_PORT = '8181'
+DEFAULT_N52WPS_PORT = '8282'
+
 REQUIRED_DOCKER_CONTAINERS = [POSTGIS_CONTAINER,
                               GEOSERVER_CONTAINER,
                               N52WPS_CONTAINER]
+
+DEFAULT_DOCKER_HOST = '127.0.0.1'
 
 
 def get_api_version(*versions):
@@ -63,8 +70,10 @@ def get_docker_client():
         p = subprocess.Popen(process, stdout=PIPE)
         boot2docker_info = json.loads(p.communicate()[0])
 
-        # for k, v in boot2docker_info.iteritems():
-        #     print k, v
+        # Defaults
+        docker_host = ''
+        docker_cert_path = ''
+        docker_tls_verify = ''
 
         # Start the boot2docker VM if it is not already running
         if boot2docker_info['State'] != "running":
@@ -78,10 +87,6 @@ def get_docker_client():
             process = ['boot2docker', 'shellinit']
             p = subprocess.Popen(process, stdout=PIPE)
             boot2docker_envs = p.communicate()[0].split()
-
-            docker_host = ''
-            docker_cert_path = ''
-            docker_tls_verify = ''
 
             for env in boot2docker_envs:
                 if 'DOCKER_HOST' in env:
@@ -107,7 +112,12 @@ def get_docker_client():
         client_kwargs['version'] = get_api_version(MAX_CLIENT_DOCKER_API_VERSION, version_client.version()['ApiVersion'])
 
         # Create Real Docker client
-        return DockerClient(**client_kwargs)
+        docker_client = DockerClient(**client_kwargs)
+
+        # Derive the host address only from string formatted: "tcp://<host>:<port>"
+        docker_client.host = docker_host.split(':')[1].strip('//')
+
+        return docker_client
 
     # For Linux
     except OSError:
@@ -116,7 +126,10 @@ def get_docker_client():
         # See: https://github.com/docker/docker-py/issues/439
         version_client = DockerClient(base_url='unix://var/run/docker.sock', version=MINIMUM_API_VERSION)
         version = get_api_version(MAX_CLIENT_DOCKER_API_VERSION, version_client.version()['ApiVersion'])
-        return DockerClient(base_url='unix://var/run/docker.sock', version=version)
+        docker_client = DockerClient(base_url='unix://var/run/docker.sock', version=version)
+        docker_client.host = DEFAULT_DOCKER_HOST
+
+        return docker_client
 
     except:
         raise
@@ -126,7 +139,15 @@ def stop_boot2docker():
     """
     Shut down boot2docker if applicable
     """
-    print("boot2docker stop")
+    try:
+        process = ['boot2docker', 'stop']
+        subprocess.call(process)
+        print('Boot2Docker VM Stopped')
+    except OSError:
+        pass
+
+    except:
+        raise
 
 
 def get_images_to_install(docker_client, container=None):
@@ -543,7 +564,7 @@ def start_docker_containers(docker_client, container=None):
         if not container_status[POSTGIS_CONTAINER] and (not container or container == POSTGIS_INPUT):
             print('Starting PostGIS container...')
             docker_client.start(container=POSTGIS_CONTAINER,
-                                port_bindings={5432: 5432})
+                                port_bindings={5432: DEFAULT_POSTGIS_PORT})
         elif not container or container == POSTGIS_INPUT:
             print('PostGIS container already running...')
     except KeyError:
@@ -557,7 +578,7 @@ def start_docker_containers(docker_client, container=None):
             # Start GeoServer
             print('Starting GeoServer container...')
             docker_client.start(container=GEOSERVER_CONTAINER,
-                                port_bindings={8080: 8080})
+                                port_bindings={8080: DEFAULT_GEOSERVER_PORT})
         elif not container or container == GEOSERVER_INPUT:
             print('GeoServer container already running...')
     except KeyError:
@@ -571,7 +592,7 @@ def start_docker_containers(docker_client, container=None):
             # Start 52 North WPS
             print('Starting 52 North WPS container...')
             docker_client.start(container=N52WPS_CONTAINER,
-                                port_bindings={8080: 8888})
+                                port_bindings={8080: DEFAULT_N52WPS_PORT})
         elif not container or container == N52WPS_INPUT:
             print('52 North WPS container already running...')
     except KeyError:
@@ -698,7 +719,7 @@ def docker_start(container=None):
     start_docker_containers(docker_client, container=container)
 
 
-def docker_stop(container=None):
+def docker_stop(container=None, boot2docker=False):
     """
     Stop Docker containers
     """
@@ -709,7 +730,8 @@ def docker_stop(container=None):
     stop_docker_containers(docker_client, container=container)
 
     # Shutdown boot2docker if applicable
-    stop_boot2docker()
+    if boot2docker and not container:
+        stop_boot2docker()
 
 
 def docker_remove(container=None):
@@ -738,11 +760,11 @@ def docker_status():
 
     # PostGIS
     if POSTGIS_CONTAINER in container_status and container_status[POSTGIS_CONTAINER]:
-        print('PostGIS: Running')
+        print('PostGIS/Database: Running')
     elif POSTGIS_CONTAINER in container_status and not container_status[POSTGIS_CONTAINER]:
-        print('PostGIS: Stopped')
+        print('PostGIS/Database: Stopped')
     else:
-        print('PostGIS: Not Installed')
+        print('PostGIS/Database: Not Installed')
 
     # GeoServer
     if GEOSERVER_CONTAINER in container_status and container_status[GEOSERVER_CONTAINER]:
@@ -804,19 +826,22 @@ def docker_ip():
     # Containers
     containers = get_docker_container_dicts(docker_client)
     container_status = get_docker_container_status(docker_client)
+    docker_host = docker_client.host
 
     # PostGIS
     try:
         if container_status[POSTGIS_CONTAINER]:
             postgis_container = containers[POSTGIS_CONTAINER]
             postgis_port = postgis_container['Ports'][0]['PublicPort']
-            print('PostGIS: {0}'.format(postgis_port))
+            print('\nPostGIS/Database:')
+            print('  Host: {0}'.format(docker_host))
+            print('  Port: {0}'.format(postgis_port))
 
         else:
-            print('PostGIS: Not Running.')
+            print('PostGIS/Database: Not Running.')
     except KeyError:
         # If key error is raised, it is likely not installed.
-        print('PostGIS: Not Installed.')
+        print('PostGIS/Database: Not Installed.')
     except:
         raise
 
@@ -825,7 +850,10 @@ def docker_ip():
         if container_status[GEOSERVER_CONTAINER]:
             geoserver_container = containers[GEOSERVER_CONTAINER]
             geoserver_port = geoserver_container['Ports'][0]['PublicPort']
-            print('GeoServer: {0}'.format(geoserver_port))
+            print('\nGeoServer:')
+            print('  Host: {0}'.format(docker_host))
+            print('  Port: {0}'.format(geoserver_port))
+            print('  Endpoint: http://{0}:{1}/geoserver'.format(docker_host, geoserver_port))
 
         else:
             print('GeoServer: Not Running.')
@@ -840,7 +868,10 @@ def docker_ip():
         if container_status[N52WPS_CONTAINER]:
             n52wps_container = containers[N52WPS_CONTAINER]
             n52wps_port = n52wps_container['Ports'][0]['PublicPort']
-            print('52 North WPS: {0}'.format(n52wps_port))
+            print('\n52 North WPS:')
+            print('  Host: {0}'.format(docker_host))
+            print('  Port: {0}'.format(n52wps_port))
+            print('  Endpoint: http://{0}:{1}/wps/WebProcessingService\n'.format(docker_host, n52wps_port))
 
         else:
             print('52 North WPS: Not Running.')

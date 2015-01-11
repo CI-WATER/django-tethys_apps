@@ -170,7 +170,7 @@ def docker_command(args):
         docker_start(container=args.container)
 
     elif args.command == 'stop':
-        docker_stop(container=args.container)
+        docker_stop(container=args.container, boot2docker=args.boot2docker)
 
     elif args.command == 'status':
         docker_status()
@@ -288,6 +288,10 @@ def tethys_command():
     docker_parser.add_argument('-c', '--container',
                                help="Execute the command only on the given container.",
                                choices=[POSTGIS_INPUT, GEOSERVER_INPUT, N52WPS_INPUT])
+    docker_parser.add_argument('-b', '--boot2docker',
+                               action='store_true',
+                               dest='boot2docker',
+                               help="Stop boot2docker on container stop. Only applicable to stop command.")
     docker_parser.set_defaults(func=docker_command)
 
     # Parse the args and call the default function
