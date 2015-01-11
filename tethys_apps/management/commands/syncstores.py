@@ -70,7 +70,13 @@ class Command(BaseCommand):
         self.stdout.write(TerminalColors.BLUE + '\nProvisioning Persistent Stores...' + TerminalColors.ENDC)
 
         # Get database manager url from the config
-        database_manager_url = settings.TETHYS_APPS_DATABASE_MANAGER_URL
+        database_manager_db = settings.TETHYS_DATABASES['tethys_db_manager']
+        database_manager_url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(database_manager_db['USER'] if 'USER' in database_manager_db else 'tethys_db_manager',
+                                                                         database_manager_db['PASSWORD'] if 'PASSWORD' in database_manager_db else 'pass',
+                                                                         database_manager_db['HOST'] if 'HOST' in database_manager_db else '127.0.0.1',
+                                                                         database_manager_db['PORT'] if 'PORT' in database_manager_db else '5435',
+                                                                         database_manager_db['NAME'] if 'NAME' in database_manager_db else 'tethys_db_manager')
+
         database_manager_name = database_manager_url.split('://')[1].split(':')[0]
 
         #--------------------------------------------------------------------------------------------------------------#
@@ -194,7 +200,12 @@ class Command(BaseCommand):
                     #--------------------------------------------------------------------------------------------------#
                     if (hasattr(persistent_store, 'spatial') and persistent_store.spatial) or persistent_store.postgis:
                         # Get URL for Tethys Superuser to enable extensions
-                        super_url = settings.TETHYS_APPS_SUPERUSER_URL
+                        super_db = settings.TETHYS_DATABASES['tethys_super']
+                        super_url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(super_db['USER'] if 'USER' in super_db else 'tethys_super',
+                                                                              super_db['PASSWORD'] if 'PASSWORD' in super_db else 'pass',
+                                                                              super_db['HOST'] if 'HOST' in super_db else '127.0.0.1',
+                                                                              super_db['PORT'] if 'PORT' in super_db else '5435',
+                                                                              super_db['NAME'] if 'NAME' in super_db else 'tethys_super')
                         super_parts = super_url.split('/')
                         new_db_url = '{0}//{1}/{2}'.format(super_parts[0], super_parts[2], full_db_name)
 

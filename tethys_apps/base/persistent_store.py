@@ -66,7 +66,12 @@ def get_persistent_store_engine(app_name, persistent_store_name):
     unique_store_name = '_'.join([app_name, persistent_store_name])
 
     # Get database manager
-    database_manager_url = settings.TETHYS_APPS_DATABASE_MANAGER_URL
+    database_manager_db = settings.TETHYS_DATABASES['tethys_db_manager']
+    database_manager_url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(database_manager_db['USER'] if 'USER' in database_manager_db else 'tethys_db_manager',
+                                                                     database_manager_db['PASSWORD'] if 'PASSWORD' in database_manager_db else 'pass',
+                                                                     database_manager_db['HOST'] if 'HOST' in database_manager_db else '127.0.0.1',
+                                                                     database_manager_db['PORT'] if 'PORT' in database_manager_db else '5435',
+                                                                     database_manager_db['NAME'] if 'NAME' in database_manager_db else 'tethys_db_manager')
 
     # Create connection engine
     engine = create_engine(database_manager_url)
@@ -92,11 +97,14 @@ def get_persistent_store_engine(app_name, persistent_store_name):
     if unique_store_name in existing_db_names:
         # Retrieve the database manager url.
         # The database manager database user is the owner of all the app databases.
-        database_manager_url = settings.TETHYS_APPS_DATABASE_MANAGER_URL
-        url_parts = database_manager_url.split('/')
+        database_manager_db = settings.TETHYS_DATABASES['tethys_db_manager']
 
         # Assemble url for persistent store with that name
-        persistent_store_url = '{0}//{1}/{2}'.format(url_parts[0], url_parts[2], unique_store_name)
+        persistent_store_url = 'postgresql://{0}:{1}@{2}:{3}/{4}'.format(database_manager_db['USER'] if 'USER' in database_manager_db else 'tethys_db_manager',
+                                                                         database_manager_db['PASSWORD'] if 'PASSWORD' in database_manager_db else 'pass',
+                                                                         database_manager_db['HOST'] if 'HOST' in database_manager_db else '127.0.0.1',
+                                                                         database_manager_db['PORT'] if 'PORT' in database_manager_db else '5435',
+                                                                         unique_store_name)
 
         # Return SQLAlchemy Engine
         return create_engine(persistent_store_url)

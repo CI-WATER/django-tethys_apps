@@ -46,13 +46,13 @@ Django Configuration
 5. Add the Tethys apps context processor and include all the default context processors::
 
     TEMPLATE_CONTEXT_PROCESSORS = ('django.contrib.auth.context_processors.auth',
-                               'django.core.context_processors.debug',
-                               'django.core.context_processors.i18n',
-                               'django.core.context_processors.media',
-                               'django.core.context_processors.static',
-                               'django.core.context_processors.tz',
-                               'django.contrib.messages.context_processors.messages',
-                               'tethys_apps.context_processors.tethys_apps_context')
+                                   'django.core.context_processors.debug',
+                                   'django.core.context_processors.i18n',
+                                   'django.core.context_processors.media',
+                                   'django.core.context_processors.static',
+                                   'django.core.context_processors.tz',
+                                   'django.contrib.messages.context_processors.messages',
+                                   'tethys_apps.context_processors.tethys_apps_context')
 
 6. Tethys apps requires a PostgreSQL > 9.1 database with the PostGIS > 2.1 extension. Refer to the documentation for each
 project for installation instructions. After installing the database, create two users with databases. Take note of the
@@ -64,11 +64,24 @@ passwords, you will need them in the next step::
 	sudo -u postgres createuser --superuser -d -R -P tethys_super
 	sudo -u postgres createdb -O tethys_super tethys_super -E utf-8
 
-7. Provide the connection credentials for the two databases you created in SQLAlchemy syntax (Tethys apps use SQLAlchemy
---Not the Django ORM--for database communication). Replace "pass" with the passwords you gave the users::
+7. Provide the connection credentials for the two databases you created. Replace "pass" with the passwords you gave the users::
 
-    TETHYS_APPS_DATABASE_MANAGER_URL = 'postgresql://tethys_db_manager:pass@localhost:5432/tethys_db_manager'
-    TETHYS_APPS_SUPERUSER_URL = 'postgresql://tethys_super:pass@localhost:5432/tethys_super'
+    TETHYS_DATABASES = {
+        'tethys_db_manager': {
+            'NAME': 'tethys_db_manager',
+            'USER': 'tethys_db_manager',
+            'PASSWORD': 'pass',
+            'HOST': '127.0.0.1',
+            'PORT': '5435'
+        },
+        'tethys_super': {
+            'NAME': 'tethys_super',
+            'USER': 'tethys_super',
+            'PASSWORD': 'pass',
+            'HOST': '127.0.0.1',
+            'PORT': '5435'
+        }
+    }
 
 8. Run **python manage.py migrate** to create the database models.
 
