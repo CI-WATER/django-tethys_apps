@@ -100,6 +100,9 @@ def get_docker_client():
             os.environ['DOCKER_TLS_VERIFY'] = docker_tls_verify
             os.environ['DOCKER_HOST'] = docker_host
             os.environ['DOCKER_CERT_PATH'] = docker_cert_path
+        else:
+            # Handle case when boot2docker is already running
+            docker_host = os.environ['DOCKER_HOST'].split('=')[1]
 
         # Get the arguments form the environment
         client_kwargs = kwargs_from_env(assert_hostname=False)
