@@ -856,7 +856,7 @@ def docker_ip():
             print('\nGeoServer:')
             print('  Host: {0}'.format(docker_host))
             print('  Port: {0}'.format(geoserver_port))
-            print('  Endpoint: http://{0}:{1}/geoserver'.format(docker_host, geoserver_port))
+            print('  Endpoint: http://{0}:{1}/geoserver/rest'.format(docker_host, geoserver_port))
 
         else:
             print('GeoServer: Not Running.')
