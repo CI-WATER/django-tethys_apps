@@ -12,7 +12,6 @@ from tethys_apps.app_harvester import SingletonAppHarvester
 
 # Other dependency imports DO NOT ERASE
 from tethys_datasets.utilities import get_dataset_engine
-from tethys_wps.utilities import get_wps_service_engine, list_wps_service_engines
 
 
 def generate_app_url_patterns():

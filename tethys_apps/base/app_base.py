@@ -115,6 +115,33 @@ class TethysAppBase(object):
         """
         return None
 
+    def spatial_dataset_services(self):
+        """
+        Use this method to define spatial dataset service connections for use in your app.
+
+        Returns:
+          iterable: A list or tuple of ``SpatialDatasetService`` objects.
+
+        Example:
+
+        ::
+
+            def spatial_dataset_services(self):
+                \"""
+                Example spatial_dataset_services method.
+                \"""
+                spatial_dataset_services = (SpatialDatasetService(name='example',
+                                                                  type='geoserver',
+                                                                  endpoint='http://www.example.com/geoserver/rest',
+                                                                  username='admin',
+                                                                  password='geoserver'
+                                                                  ),
+                )
+
+                return spatial_dataset_services
+        """
+        return None
+
     def wps_services(self):
         """
         Use this method to define web processing service connections for use in your app.

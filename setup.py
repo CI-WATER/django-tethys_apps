@@ -16,7 +16,7 @@ requires = ['django',
             'django-tethys_wps',
             'docker-py']
 
-version = '0.8.5'
+version = '0.9.0'
 
 setup(
     name='django-tethys_apps',

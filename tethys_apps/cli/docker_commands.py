@@ -13,7 +13,8 @@ from docker.client import Client as DockerClient, DEFAULT_DOCKER_API_VERSION as 
 __all__ = ['docker_init', 'docker_start',
            'docker_stop', 'docker_status',
            'docker_update', 'docker_remove',
-           'docker_ip', 'POSTGIS_INPUT', 'GEOSERVER_INPUT', 'N52WPS_INPUT']
+           'docker_ip', 'docker_restart',
+           'POSTGIS_INPUT', 'GEOSERVER_INPUT', 'N52WPS_INPUT']
 
 MINIMUM_API_VERSION = '1.12'
 
@@ -735,6 +736,20 @@ def docker_stop(container=None, boot2docker=False):
     # Shutdown boot2docker if applicable
     if boot2docker and not container:
         stop_boot2docker()
+
+
+def docker_restart(container=None):
+    """
+    Restart Docker containers
+    """
+    # Retrieve a Docker client
+    docker_client = get_docker_client()
+
+    # Stop the Docker containers
+    stop_docker_containers(docker_client, container=container)
+
+    # Start the Docker containers
+    start_docker_containers(docker_client, container=container)
 
 
 def docker_remove(container=None):

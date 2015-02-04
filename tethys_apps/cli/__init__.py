@@ -4,12 +4,14 @@ import subprocess
 import os
 import random
 import string
+import shutil
 
 from django.template import Template, Context
 from django.conf import settings
 
 from tethys_apps.terminal_colors import TerminalColors
 from .docker_commands import *
+from tethys_apps.helpers import get_tethysapp_dir, get_installed_tethys_apps
 
 # Module level variables
 GEN_SETTINGS_OPTION = 'settings'
@@ -17,6 +19,7 @@ GEN_APACHE_OPTION = 'apache'
 VALID_GEN_OBJECTS = (GEN_SETTINGS_OPTION, GEN_APACHE_OPTION)
 DEFAULT_INSTALLATION_DIRECTORY = '/usr/lib/tethys/src'
 DEVELOPMENT_DIRECTORY = '/usr/lib/tethys/tethys'
+PREFIX = 'tethysapp'
 
 # Setup Django settings
 settings.configure()
@@ -35,7 +38,7 @@ def get_manage_path(args):
 
         # Throw error if path is not valid
         if not os.path.isfile(manage_path):
-            print('Error: Can\'t open file "{0}", no such file.'.format(manage_path))
+            print('ERROR: Can\'t open file "{0}", no such file.'.format(manage_path))
             exit(1)
 
     elif not os.path.isfile(manage_path):
@@ -44,7 +47,7 @@ def get_manage_path(args):
 
         # Throw error if default path is not valid
         if not os.path.isfile(manage_path):
-            print('Error: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
+            print('ERROR: Cannot find the "manage.py" file at the default location. Try using the "--manage"'
                   'option to provide the path to the location of the "manage.py" file.')
             exit(1)
 
@@ -55,11 +58,28 @@ def scaffold_command(args):
     """
     Create a new Tethys app projects in the current directory.
     """
-    PREFIX = 'tethysapp'
     project_name = args.name
 
+    # Only underscores
+    if '-' in project_name:
+        project_name = project_name.replace('-', '_')
+        print('INFO: Dash ("-") characters changed to underscores ("_").')
+
+    # Only lowercase
+    contains_uppers = False
+    for letter in project_name:
+        if letter.isupper():
+            contains_uppers = True
+
+    if contains_uppers:
+        project_name = project_name.lower()
+        print('INFO: Uppercase characters changed to lowercase.')
+
+    # Prepend prefix
     if PREFIX not in project_name:
         project_name = '{0}-{1}'.format(PREFIX, project_name)
+
+    print('INFO: Initializing tethys app project with name "{0}".\n'.format(project_name))
 
     process = ['paster', 'create', '-t', 'tethys_app_scaffold', project_name]
     subprocess.call(process)
@@ -107,7 +127,7 @@ def generate_command(args):
         if os.path.isdir(args.directory):
             destination_dir = args.directory
         else:
-            print('Error: "{0}" is not a valid directory.')
+            print('ERROR: "{0}" is not a valid directory.')
             exit(1)
 
     destination_path = os.path.join(destination_dir, destination_file)
@@ -117,7 +137,7 @@ def generate_command(args):
         valid_inputs = ('y', 'n', 'yes', 'no')
         no_inputs = ('n', 'no')
 
-        overwrite_input = raw_input('Warning: "{0}" already exists. '
+        overwrite_input = raw_input('WARNING: "{0}" already exists. '
                                     'Overwrite? (y/n): '.format(destination_file)).lower()
 
         while overwrite_input not in valid_inputs:
@@ -159,6 +179,62 @@ def manage_command(args):
             pass
 
 
+def uninstall_command(args):
+    """
+    Uninstall an app command.
+    """
+    app_name = args.app
+    installed_apps = get_installed_tethys_apps()
+
+    if PREFIX in app_name:
+        prefix_length = len(PREFIX) + 1
+        app_name = app_name[prefix_length:]
+
+    if app_name not in installed_apps:
+        print('WARNING: App with name "{0}" cannot be uninstalled, because it is not installed.'.format(app_name))
+        exit(0)
+
+    app_with_prefix = '{0}-{1}'.format(PREFIX, app_name)
+
+    # Confirm
+    valid_inputs = ('y', 'n', 'yes', 'no')
+    no_inputs = ('n', 'no')
+
+    overwrite_input = raw_input('Are you sure you want to uninstall "{0}"? (y/n): '.format(app_with_prefix)).lower()
+
+    while overwrite_input not in valid_inputs:
+        overwrite_input = raw_input('Invalid option. Are you sure you want to '
+                                    'uninstall "{0}"? (y/n): '.format(app_with_prefix)).lower()
+
+    if overwrite_input in no_inputs:
+        print('Uninstall cancelled by user.')
+        exit(0)
+
+    try:
+        # Remove directory
+        shutil.rmtree(installed_apps[app_name])
+    except OSError:
+        # Remove symbolic link
+        os.remove(installed_apps[app_name])
+
+    # Uninstall using pip
+    process = ['pip', 'uninstall', '-y', '{0}-{1}'.format(PREFIX, app_name)]
+
+    try:
+        subprocess.Popen(process, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0]
+    except KeyboardInterrupt:
+        pass
+
+    print('App "{0}" successfully uninstalled.'.format(app_with_prefix))
+
+
+def update_command(args):
+    """
+    Update Tethys Platform command.
+    """
+    print('update')
+
+
 def docker_command(args):
     """
     Docker management commands.
@@ -183,6 +259,9 @@ def docker_command(args):
 
     elif args.command == 'ip':
         docker_ip()
+
+    elif args.command == 'restart':
+        docker_restart(container=args.container)
 
 
 def syncstores_command(args):
@@ -252,10 +331,20 @@ def tethys_command():
 
     # Setup start server command
     manage_parser = subparsers.add_parser('manage', help='Management commands for Tethys Platform.')
-    manage_parser.add_argument('command', help='Management command to run.', choices=['start', 'syncdb'])
+    manage_parser.add_argument('command', help='Management command to run.',
+                               choices=['start', 'syncdb'])
     manage_parser.add_argument('-m', '--manage', help='Absolute path to manage.py for Tethys Platform installation.')
     manage_parser.add_argument('-p', '--port', type=int, help='Port on which to start the development server.')
     manage_parser.set_defaults(func=manage_command)
+
+    # Setup uninstall command
+    uninstall_parser = subparsers.add_parser('uninstall', help='Uninstall an app.')
+    uninstall_parser.add_argument('app', help='Name of the app to uninstall.')
+    uninstall_parser.set_defaults(func=uninstall_command)
+
+    # Setup update command
+    update_parser = subparsers.add_parser('update', help='Update Tethys Platform.')
+    update_parser.set_defaults(func=update_command)
 
     # Sync stores command
     syncstores_parser = subparsers.add_parser('syncstores', help='Management command for App Persistent Stores.')
@@ -280,7 +369,7 @@ def tethys_command():
     docker_parser = subparsers.add_parser('docker', help="Management commands for the Tethys Docker containers.")
     docker_parser.add_argument('command',
                                help='Docker command to run.',
-                               choices=['init', 'start', 'stop', 'status', 'update', 'remove', 'ip'])
+                               choices=['init', 'start', 'stop', 'status', 'update', 'remove', 'ip', 'restart'])
     docker_parser.add_argument('-d', '--defaults',
                                action='store_true',
                                dest='defaults',
